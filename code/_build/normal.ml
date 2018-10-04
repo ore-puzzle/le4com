@@ -92,13 +92,11 @@ let string_of_norm e =
 
 (* ==== 正規形への変換 ==== *)
 
-
-
 let rec norm_exp (e: Syntax.exp) (f: cexp -> exp) = match e with
-  | S.Var id -> Var fresh_id id
-  | S.ILit i -> IntV i
-  | S.BLit true -> IntV 1
-  | S.BLit false -> IntV 0
+    S.Var id -> f (ValExp (Var (fresh_id id)))
+  | S.ILit i -> f (ValExp (ILit i))
+  | S.BLit true -> f (ValExp (ILit 1))
+  | S.BLit false -> f (ValExp (ILit 0))
   | S.BinOp (binOp, e1, e2) ->
 
 and normalize e = norm_exp e (fun ce -> CompExp ce)
