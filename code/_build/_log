@@ -16,9 +16,9 @@ ocamlfind ocamldep -modules vm.ml > vm.ml.depends # cached
 # Target: flat.ml.depends, tags: { extension:ml, file:flat.ml, ocaml, ocamldep, quiet }
 ocamlfind ocamldep -modules flat.ml > flat.ml.depends # cached
 # Target: closure.ml.depends, tags: { extension:ml, file:closure.ml, ocaml, ocamldep, quiet }
-ocamlfind ocamldep -modules closure.ml > closure.ml.depends # cached
+ocamlfind ocamldep -modules closure.ml > closure.ml.depends
 # Target: normal.ml.depends, tags: { extension:ml, file:normal.ml, ocaml, ocamldep, quiet }
-ocamlfind ocamldep -modules normal.ml > normal.ml.depends
+ocamlfind ocamldep -modules normal.ml > normal.ml.depends # cached
 # Target: misc.ml.depends, tags: { extension:ml, file:misc.ml, ocaml, ocamldep, quiet }
 ocamlfind ocamldep -modules misc.ml > misc.ml.depends # cached
 # Target: misc.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:misc.cmo, file:misc.ml, implem, ocaml, quiet }
@@ -28,7 +28,7 @@ ocamlfind ocamldep -modules pretty.mli > pretty.mli.depends # cached
 # Target: pretty.cmi, tags: { byte, compile, extension:mli, file:pretty.mli, interf, ocaml, quiet }
 ocamlfind ocamlc -c -o pretty.cmi pretty.mli # cached
 # Target: normal.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:normal.cmo, file:normal.ml, implem, ocaml, quiet }
-ocamlfind ocamlc -c -o normal.cmo normal.ml
+ocamlfind ocamlc -c -o normal.cmo normal.ml # cached
 # Target: closure.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:closure.cmo, file:closure.ml, implem, ocaml, quiet }
 ocamlfind ocamlc -c -o closure.cmo closure.ml
 # Target: flat.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:flat.cmo, file:flat.ml, implem, ocaml, quiet }
@@ -96,7 +96,7 @@ ocamlfind ocamldep -modules pretty.ml > pretty.ml.depends # cached
 # Target: pretty.cmx, tags: { compile, extension:cmx, extension:ml, file:pretty.cmx, file:pretty.ml, implem, native, ocaml, quiet }
 ocamlfind ocamlopt -c -o pretty.cmx pretty.ml # cached
 # Target: normal.cmx, tags: { compile, extension:cmx, extension:ml, file:normal.cmx, file:normal.ml, implem, native, ocaml, quiet }
-ocamlfind ocamlopt -c -o normal.cmx normal.ml
+ocamlfind ocamlopt -c -o normal.cmx normal.ml # cached
 # Target: closure.cmx, tags: { compile, extension:cmx, extension:ml, file:closure.cmx, file:closure.ml, implem, native, ocaml, quiet }
 ocamlfind ocamlopt -c -o closure.cmx closure.ml
 # Target: flat.cmx, tags: { compile, extension:cmx, extension:ml, file:flat.cmx, file:flat.ml, implem, native, ocaml, quiet }
