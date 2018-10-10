@@ -123,21 +123,27 @@ let ccexp_of_ncexp = function
 (*let rec freevar (t: N.exp) id_list : MySet.t =
   match t with*)
 
-let gather_id_from_value value (l: id list list) =
+let gather_id_from_value value [decl_ids; var_ids] =
   match value with
-    N.Var id -> 
-  | _ -> []
+    N.Var id -> [decl_ids; (id :: var_ids)]
+  | _ -> [decl_ids; var_ids]
 
-let rec gather_id_from_cexp = function
-    N.ValExp v -> gather_id_from_value v
+let rec gather_id_from_cexp cexp id_list =
+  match cexp with
+    N.ValExp v -> gather_id_from_value v id_list
   | N.BinOp (_, v1, v2)
   | N.AppExp (v1, v2)
-  | N.TupleExp (v1, v2) -> (gather_id_from_value v1) @ (gather_id_from_value v2)
-  | N.IfExp (v, e1, e2) -> (gather_id_from_value v) @ (gather_id_from_exp e1) @ (gather_id_from_exp e2)
-  | N.ProjExp (v, _) -> gather_id_from_value v
+  | N.TupleExp (v1, v2) ->
+      let [d_ids1; v_ids1] = gather_id_from_value v1 id_list in
+      let [d_ids1; v_ids
+  | N.IfExp (v, e1, e2) -> (gather_id_from_value v id_list) 
+                            @ (gather_id_from_exp e1 id_list) 
+                            @ (gather_id_from_exp e2 id_list)
+  | N.ProjExp (v, _) -> gather_id_from_value v id_list
 
-and gather_id_from_exp = function
-    N.CompExp ce -> gather_id_from_cexp ce
+and gather_id_from_exp exp [decl_ids; var_ids] =
+  match exp with
+    N.CompExp ce -> gather_id_from_cexp ce [decl_ids; var_ids]
   | N.LetExp (id, ce, e) 
   | N.LoopExp (id, ce, e) -> id :: (gather_id_from_cexp ce) @ (gather_id_from_exp e)
   | N.LetRecExp (id1, id2, e1, e2) -> [id1; id2] @ (gather_id_from_exp e1) @ (gather_id_from_exp e2)
