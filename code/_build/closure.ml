@@ -118,55 +118,110 @@ let ccexp_of_ncexp = function
   | N.AppExp (v1, v2) -> AppExp (cvalue_of_nvalue v1, [cvalue_of_nvalue v2])
   | N.IfExp (v, e1, e2) -> err "For debug: This error must not be raised"
   | N.TupleExp (v1, v2) -> TupleExp [cvalue_of_nvalue v1; cvalue_of_nvalue v2]
-  | N.ProjExp (v, i) -> ProjExp (cvalue_of_nvalue v, i)
+  | N.ProjExp (v, i) -> ProjExp (cvalue_of_nvalue v, i - 1)
 
-(*let rec freevar (t: N.exp) id_list : MySet.t =
-  match t with*)
+let gather_id_from_value value [decl_ids; var_ids] =
+  match value with
+    N.Var id -> [decl_ids; (id :: var_ids)]
+  | _ -> [decl_ids; var_ids]
 
-let gather_id_from_value = function
-    N.Var id -> [id]
-  | _ -> []
-
-let rec gather_id_from_cexp = function
-    N.ValExp v -> gather_id_from_value v
+let rec gather_id_from_cexp cexp id_list =
+  match cexp with
+    N.ValExp v -> gather_id_from_value v id_list
   | N.BinOp (_, v1, v2)
   | N.AppExp (v1, v2)
-  | N.TupleExp (v1, v2) -> (gather_id_from_value v1) @ (gather_id_from_value v2)
-  | N.IfExp (v, e1, e2) -> (gather_id_from_value v) @ (gather_id_from_exp e1) @ (gather_id_from_exp e2)
-  | N.ProjExp (v, _) -> gather_id_from_value v
+  | N.TupleExp (v1, v2) ->
+      let [d_ids1; v_ids1] = gather_id_from_value v1 id_list in
+      let [d_ids2; v_ids2] = gather_id_from_value v2 id_list in
+      [d_ids1 @ d_ids2; v_ids1 @ v_ids2]
+  | N.IfExp (v, e1, e2) -> 
+      let [d_ids1; v_ids1] = gather_id_from_value v id_list in
+      let [d_ids2; v_ids2] = gather_id_from_exp e1 id_list in
+      let [d_ids3; v_ids3] = gather_id_from_exp e2 id_list in
+      [d_ids1 @ d_ids2 @ d_ids3; v_ids1 @ v_ids2 @ v_ids3]
+  | N.ProjExp (v, _) -> gather_id_from_value v id_list
 
-and gather_id_from_exp = function
-    N.CompExp ce -> gather_id_from_cexp ce
+and gather_id_from_exp exp [decl_ids; var_ids] =
+  match exp with
+    N.CompExp ce -> gather_id_from_cexp ce [decl_ids; var_ids]
   | N.LetExp (id, ce, e) 
-  | N.LoopExp (id, ce, e) -> id :: (gather_id_from_cexp ce) @ (gather_id_from_exp e)
-  | N.LetRecExp (id1, id2, e1, e2) -> [id1; id2] @ (gather_id_from_exp e1) @ (gather_id_from_exp e2)
-  | N.RecurExp v -> gather_id_from_value v
-  
+  | N.LoopExp (id, ce, e) -> 
+      let [d_ids1; v_ids1] = gather_id_from_cexp ce [decl_ids; var_ids] in
+      let [d_ids2; v_ids2] = gather_id_from_exp e [decl_ids; var_ids] in
+      [id :: d_ids1 @ d_ids2; v_ids1 @ v_ids2]
+  | N.LetRecExp (id1, id2, e1, e2) -> 
+      let [d_ids1; v_ids1] = gather_id_from_exp e1 [decl_ids; var_ids] in
+      let [d_ids2; v_ids2] = gather_id_from_exp e2 [decl_ids; var_ids] in
+      [[id1; id2] @ d_ids1 @ d_ids2; v_ids1 @ v_ids2] 
+  | N.RecurExp v -> gather_id_from_value v [decl_ids; var_ids]
 
+let rec delete_duplication input_l output_l =
+  match input_l with
+    [] -> List.rev output_l
+  | head :: rest -> if List.mem head output_l then delete_duplication rest output_l
+                    else delete_duplication rest (head :: output_l)
+
+let rec remove e input_l output_l =
+  match input_l with
+    [] -> output_l
+  | head :: rest -> if e = head then (List.rev output_l) @ rest
+                    else remove e rest (head :: output_l)
+
+let rec diff l1 l2 =
+  match l2 with
+    [] -> l1
+  | head :: rest -> if List.mem head l1 then diff (remove head l1 []) rest
+                    else diff l1 rest
+
+let rec var_of_id = function
+    [] -> []
+  | head :: rest -> (Var head) :: var_of_id rest
+
+let add_to_closure (TupleExp l) input_l = TupleExp (l @ input_l)
+
+    
+  
 (* entry point *)
-let convert exp =  CompExp (ValExp (IntV 1)) 
- (* let rec not_func_loop exp =
+
+let convert exp =
+  let rec body_loop exp (f: exp -> exp) =
     match exp with
       N.CompExp ce ->
        (match ce with
-          N.IfExp (v, e1, e2) -> CompExp (IfExp (cvalue_of_nvalue v, not_func_loop e1, not_func_loop e2))
-        | _ -> CompExp (ccexp_of_ncexp ce))
+          N.IfExp (v, e1, e2) -> f (CompExp (IfExp (cvalue_of_nvalue v, body_loop e1 f, body_loop e2 f)))
+        | _ -> f (CompExp (ccexp_of_ncexp ce)))
     | N.LetExp (id, ce, e)
     | N.LoopExp (id, ce, e) ->
         let ce' =
          (match ce with
-            N.IfExp (v, e1, e2) -> IfExp (cvalue_of_nvalue v, not_func_loop e1, not_func_loop e2)
+            N.IfExp (v, e1, e2) -> IfExp (cvalue_of_nvalue v, body_loop e1 f, body_loop e2 f)
           | _ -> ccexp_of_ncexp ce) in
-        LetExp (id, ce', not_func_loop e)
-    | N.LetRecExp _ -> in_func_loop exp (...)
-    | N.RecurExp v -> RecurExp (cvalue_of_nvalue v)
-  and in_func_loop exp f =
-    match exp with
-      N.CompExp ce -> 
-    | N.LetExp (id, ce, e) -> 
+        f (LetExp (id, ce', body_loop e f))
     | N.LetRecExp (id1, id2, e1, e2) ->
-    | N.LoopExp (id, ce, e) ->
-    | N.RecurExp v ->
+        let [decl_id_list; var_id_list] = gather_id_from_exp e1 [[id2]; []] in
+        let [decl_id_set; var_id_set] = [delete_duplication decl_id_list []; delete_duplication var_id_list []] in
+        let free_var_id = diff var_id_set decl_id_set in
+        let free_var = var_of_id free_var_id in
+        let new_id = fresh_id ("b_" ^ id1) in
+        let closure = TupleExp [Var new_id] in
+        if List.length free_var = 0 then
+          let converted = body_loop e1 f in
+          f (LetRecExp (new_id, [id1; id2], converted, body_loop e2 (fun e -> LetExp (id1, closure, e))))
+        else
+          let rec make_function id suffix f_var =
+            match f_var with
+              [v] -> fun e -> LetExp (v, ProjExp (Var id, suffix), e)
+            | head :: rest -> 
+                let func1 = fun e -> LetExp (head, ProjExp (Var id, suffix), e) in
+                let func2 = make_function id (suffix+1) rest in
+                let composed_func e = func1 (func2 e) in
+                composed_func
+          in
+            let new_func = make_function id1 1 free_var_id in
+            let converted = body_loop e1 new_func in
+            f (LetRecExp (new_id, [id1; id2], converted, 
+                          body_loop e2 (fun e -> LetExp (id1, add_to_closure closure free_var, e))))
+    | N.RecurExp v -> f (RecurExp (cvalue_of_nvalue v))
   in
-    not_func_loop exp (fun x -> x)*)
+    body_loop exp (fun x -> x)
   
