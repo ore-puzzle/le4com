@@ -6,8 +6,4 @@
 ._d
 ._ncdi
 .DS_Store
-code/parser.ml
-code/lexer.ml
-code/minimlc
-code/_build/_digest
-code/_build/_log
+code/_build/*

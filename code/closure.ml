@@ -112,18 +112,22 @@ let cvalue_of_nvalue = function
     N.Var id -> Var id
   | N.IntV i -> IntV i
 
-let ccexp_of_ncexp = function
-    N.ValExp value -> ValExp (cvalue_of_nvalue value)
-  | N.BinOp (binOp, v1, v2) -> BinOp (binOp, cvalue_of_nvalue v1, cvalue_of_nvalue v2)
-  | N.AppExp (v1, v2) -> AppExp (cvalue_of_nvalue v1, [cvalue_of_nvalue v2])
-  | N.IfExp (v, e1, e2) -> err "For debug: This error must not be raised"
-  | N.TupleExp (v1, v2) -> TupleExp [cvalue_of_nvalue v1; cvalue_of_nvalue v2]
-  | N.ProjExp (v, i) -> ProjExp (cvalue_of_nvalue v, i - 1)
+let cexp_of_ncexp ncexp (f: cexp -> exp) =
+  match ncexp with
+    N.ValExp value -> f (ValExp (cvalue_of_nvalue value))
+  | N.BinOp (binOp, v1, v2) -> f (BinOp (binOp, cvalue_of_nvalue v1, cvalue_of_nvalue v2))
+  (*| N.AppExp (v1, v2) -> f (AppExp (cvalue_of_nvalue v1, [cvalue_of_nvalue v2]))*)
+  | N.AppExp (Var id, v) ->
+      let new_id = fresh_id ("r_" ^ id) in
+      LetExp (new_id, ProjExp (Var id, 0), f (AppExp (Var new_id, [Var id; cvalue_of_nvalue v])))
+  | N.IfExp _ -> err "For debug: This error must not be raised at closure"
+  | N.TupleExp (v1, v2) -> f (TupleExp [cvalue_of_nvalue v1; cvalue_of_nvalue v2])
+  | N.ProjExp (v, i) -> f (ProjExp (cvalue_of_nvalue v, i - 1))
 
-let gather_id_from_value value [decl_ids; var_ids] =
+let gather_id_from_value value (decl_ids, var_ids) =
   match value with
-    N.Var id -> [decl_ids; (id :: var_ids)]
-  | _ -> [decl_ids; var_ids]
+    N.Var id -> (decl_ids, (id :: var_ids))
+  | _ -> (decl_ids, var_ids)
 
 let rec gather_id_from_cexp cexp id_list =
   match cexp with
@@ -131,29 +135,29 @@ let rec gather_id_from_cexp cexp id_list =
   | N.BinOp (_, v1, v2)
   | N.AppExp (v1, v2)
   | N.TupleExp (v1, v2) ->
-      let [d_ids1; v_ids1] = gather_id_from_value v1 id_list in
-      let [d_ids2; v_ids2] = gather_id_from_value v2 id_list in
-      [d_ids1 @ d_ids2; v_ids1 @ v_ids2]
+      let (d_ids1, v_ids1) = gather_id_from_value v1 id_list in
+      let (d_ids2, v_ids2) = gather_id_from_value v2 id_list in
+      (d_ids1 @ d_ids2, v_ids1 @ v_ids2)
   | N.IfExp (v, e1, e2) -> 
-      let [d_ids1; v_ids1] = gather_id_from_value v id_list in
-      let [d_ids2; v_ids2] = gather_id_from_exp e1 id_list in
-      let [d_ids3; v_ids3] = gather_id_from_exp e2 id_list in
-      [d_ids1 @ d_ids2 @ d_ids3; v_ids1 @ v_ids2 @ v_ids3]
+      let (d_ids1, v_ids1) = gather_id_from_value v id_list in
+      let (d_ids2, v_ids2) = gather_id_from_exp e1 id_list in
+      let (d_ids3, v_ids3) = gather_id_from_exp e2 id_list in
+      (d_ids1 @ d_ids2 @ d_ids3, v_ids1 @ v_ids2 @ v_ids3)
   | N.ProjExp (v, _) -> gather_id_from_value v id_list
 
-and gather_id_from_exp exp [decl_ids; var_ids] =
+and gather_id_from_exp exp (decl_ids, var_ids) =
   match exp with
-    N.CompExp ce -> gather_id_from_cexp ce [decl_ids; var_ids]
+    N.CompExp ce -> gather_id_from_cexp ce (decl_ids, var_ids)
   | N.LetExp (id, ce, e) 
   | N.LoopExp (id, ce, e) -> 
-      let [d_ids1; v_ids1] = gather_id_from_cexp ce [decl_ids; var_ids] in
-      let [d_ids2; v_ids2] = gather_id_from_exp e [decl_ids; var_ids] in
-      [id :: d_ids1 @ d_ids2; v_ids1 @ v_ids2]
+      let (d_ids1, v_ids1) = gather_id_from_cexp ce (decl_ids, var_ids) in
+      let (d_ids2, v_ids2) = gather_id_from_exp e (decl_ids, var_ids) in
+      (id :: d_ids1 @ d_ids2, v_ids1 @ v_ids2)
   | N.LetRecExp (id1, id2, e1, e2) -> 
-      let [d_ids1; v_ids1] = gather_id_from_exp e1 [decl_ids; var_ids] in
-      let [d_ids2; v_ids2] = gather_id_from_exp e2 [decl_ids; var_ids] in
-      [[id1; id2] @ d_ids1 @ d_ids2; v_ids1 @ v_ids2] 
-  | N.RecurExp v -> gather_id_from_value v [decl_ids; var_ids]
+      let (d_ids1, v_ids1) = gather_id_from_exp e1 (decl_ids, var_ids) in
+      let (d_ids2, v_ids2) = gather_id_from_exp e2 (decl_ids, var_ids) in
+      ([id1; id2] @ d_ids1 @ d_ids2, v_ids1 @ v_ids2) 
+  | N.RecurExp v -> gather_id_from_value v (decl_ids, var_ids)
 
 let rec delete_duplication input_l output_l =
   match input_l with
@@ -189,39 +193,39 @@ let convert exp =
       N.CompExp ce ->
        (match ce with
           N.IfExp (v, e1, e2) -> f (CompExp (IfExp (cvalue_of_nvalue v, body_loop e1 f, body_loop e2 f)))
-        | _ -> f (CompExp (ccexp_of_ncexp ce)))
-    | N.LetExp (id, ce, e)
-    | N.LoopExp (id, ce, e) ->
-        let ce' =
-         (match ce with
-            N.IfExp (v, e1, e2) -> IfExp (cvalue_of_nvalue v, body_loop e1 f, body_loop e2 f)
-          | _ -> ccexp_of_ncexp ce) in
-        f (LetExp (id, ce', body_loop e f))
+        | _ -> f (cexp_of_ncexp ce (fun ce -> CompExp ce)))
+    | N.LetExp (id, ce, e) ->
+       (match ce with
+          N.IfExp (v, e1, e2) -> f (CompExp (IfExp (cvalue_of_nvalue v, body_loop e1 f, body_loop e2 f)))
+        | _ -> f (cexp_of_ncexp ce (fun ce' -> LetExp (id, ce', body_loop e (fun e -> e)))))
     | N.LetRecExp (id1, id2, e1, e2) ->
-        let [decl_id_list; var_id_list] = gather_id_from_exp e1 [[id2]; []] in
-        let [decl_id_set; var_id_set] = [delete_duplication decl_id_list []; delete_duplication var_id_list []] in
+        let (decl_id_list, var_id_list) = gather_id_from_exp e1 ([id1; id2], []) in
+        let (decl_id_set, var_id_set) = (delete_duplication decl_id_list [], delete_duplication var_id_list []) in
         let free_var_id = diff var_id_set decl_id_set in
         let free_var = var_of_id free_var_id in
         let new_id = fresh_id ("b_" ^ id1) in
         let closure = TupleExp [Var new_id] in
         if List.length free_var = 0 then
           let converted = body_loop e1 f in
-          f (LetRecExp (new_id, [id1; id2], converted, body_loop e2 (fun e -> LetExp (id1, closure, e))))
+          f (LetRecExp (new_id, [id1; id2], converted, LetExp (id1, closure, body_loop e2 (fun e -> e))))
         else
-          let rec make_function id suffix f_var =
+          let rec make_function id index f_var =
             match f_var with
-              [v] -> fun e -> LetExp (v, ProjExp (Var id, suffix), e)
+              [v] -> fun e -> LetExp (v, ProjExp (Var id, index), e)
             | head :: rest -> 
-                let func1 = fun e -> LetExp (head, ProjExp (Var id, suffix), e) in
-                let func2 = make_function id (suffix+1) rest in
+                let func1 = fun e -> LetExp (head, ProjExp (Var id, index), e) in
+                let func2 = make_function id (index+1) rest in
                 let composed_func e = func1 (func2 e) in
                 composed_func
           in
             let new_func = make_function id1 1 free_var_id in
             let converted = body_loop e1 new_func in
-            f (LetRecExp (new_id, [id1; id2], converted, 
-                          body_loop e2 (fun e -> LetExp (id1, add_to_closure closure free_var, e))))
+            f (LetRecExp (new_id, [id1; id2], converted, LetExp (id1, add_to_closure closure free_var, body_loop e2 (fun e -> e))))
+    | N.LoopExp (id, ce, e) ->
+       (match ce with
+          N.IfExp (v, e1, e2) -> f (CompExp (IfExp (cvalue_of_nvalue v, body_loop e1 f, body_loop e2 f)))
+        | _ -> f (cexp_of_ncexp ce (fun ce' -> LoopExp (id, ce', body_loop e (fun e -> e)))))
     | N.RecurExp v -> f (RecurExp (cvalue_of_nvalue v))
   in
-    body_loop exp (fun x -> x)
+    body_loop exp (fun e -> e)
   

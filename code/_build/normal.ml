@@ -104,17 +104,16 @@ let rec norm_exp (e: Syntax.exp) (f: cexp -> exp) = match e with
   | S.ILit i -> f (ValExp (IntV i))
   | S.BLit true -> f (ValExp (IntV 1))
   | S.BLit false -> f (ValExp (IntV 0))
-  | S.BinOp (binOp, e1, e2) ->
-     (match e1 with
-        S.Var id -> let k = fun v -> f (BinOp (binOp, Var id, v)) in norm_exp e2 (vk k)
-      | S.ILit i -> let k = fun v -> f (BinOp (binOp, IntV i, v)) in norm_exp e2 (vk k)
-      | S.BLit true -> let k = fun v -> f (BinOp (binOp, IntV 1, v)) in norm_exp e2 (vk k)
-      | S.BLit false -> let k = fun v -> f (BinOp (binOp, IntV 0, v)) in norm_exp e2 (vk k)
-      | _ ->
-          let v1 = fresh_id "v" in
+   | S.BinOp (binOp, e1, e2) ->
+     (match e2 with
+        S.Var id -> let k = fun v -> f (BinOp (binOp, v, Var id)) in norm_exp e1 (vk k)
+      | S.ILit i -> let k = fun v -> f (BinOp (binOp, v, IntV i)) in norm_exp e1 (vk k)
+      | S.BLit true -> let k = fun v -> f (BinOp (binOp, v, IntV 1)) in norm_exp e1 (vk k)
+      | S.BLit false -> let k = fun v -> f (BinOp (binOp, v, IntV 0)) in norm_exp e1 (vk k)
+      | _ -> 
           let v2 = fresh_id "v" in
-          let (tmp: exp) = norm_exp e2 (fun ce -> LetExp (v2, ce, f (BinOp (binOp, Var v1, Var v2)))) in
-          norm_exp e1 (fun ce -> LetExp (v1, ce, tmp)))
+          let k = fun v -> (norm_exp e2 (fun ce -> LetExp (v2, ce, f (BinOp (binOp, v, Var v2))))) in
+          norm_exp e1 (vk k))
   | S.IfExp (e1, e2, e3) ->
       let k = fun v -> f (IfExp (v, norm_exp e2 f, norm_exp e3 f)) in
       norm_exp e1 (vk k)
@@ -122,36 +121,35 @@ let rec norm_exp (e: Syntax.exp) (f: cexp -> exp) = match e with
       norm_exp e1 (fun ce -> LetExp (id, ce, norm_exp e2 f))
   | S.FunExp (id, e') ->
       let f' = fresh_id "f" in
-      LetRecExp (f', id, norm_exp e' (fun ce -> CompExp ce), f (ValExp ((Var f'))))
+      let letrecexp = S.LetRecExp (f', id, e', S.Var f') in
+      norm_exp letrecexp f
   | S.AppExp (e1, e2) ->
-      (match e1 with
-        S.Var id -> let k = fun v -> f (AppExp (Var id, v)) in norm_exp e2 (vk k)
-      | S.ILit i -> let k = fun v -> f (AppExp (IntV i, v)) in norm_exp e2 (vk k)
-      | S.BLit true -> let k = fun v -> f (AppExp (IntV 1, v)) in norm_exp e2 (vk k)
-      | S.BLit false -> let k = fun v -> f (AppExp (IntV 0, v)) in norm_exp e2 (vk k)
-      | _ ->
-          let v1 = fresh_id "v" in
+      (match e2 with
+        S.Var id -> let k = fun v -> f (AppExp (v, Var id)) in norm_exp e1 (vk k)
+      | S.ILit i -> let k = fun v -> f (AppExp (v, IntV i)) in norm_exp e1 (vk k)
+      | S.BLit true -> let k = fun v -> f (AppExp (v, IntV 1)) in norm_exp e1 (vk k)
+      | S.BLit false -> let k = fun v -> f (AppExp (v, IntV 0)) in norm_exp e1 (vk k)
+      | _ -> 
           let v2 = fresh_id "v" in
-          let (tmp: exp) = norm_exp e2 (fun ce -> LetExp (v2, ce, f (AppExp (Var v1, Var v2)))) in
-          norm_exp e1 (fun ce -> LetExp (v1, ce, tmp)))
+          let k = fun v -> (norm_exp e2 (fun ce -> LetExp (v2, ce, f (AppExp (v, Var v2))))) in
+          norm_exp e1 (vk k))
   | S.LetRecExp (id1, id2, e1, e2) ->
-      LetRecExp (id1, id2, norm_exp e1 f, norm_exp e2 f)
+      LetRecExp (id1, id2, norm_exp e1 (fun ce -> CompExp ce), norm_exp e2 f)
   | S.LoopExp (id, e1, e2) ->
       norm_exp e1 (fun ce -> LoopExp (id, ce, norm_exp e2 f))
   | S.RecurExp e' ->
       let k = fun v -> RecurExp v in
       norm_exp e' (vk k)
   | S.TupleExp (e1, e2) ->
-      (match e1 with
-        S.Var id -> let k = fun v -> f (TupleExp (Var id, v)) in norm_exp e2 (vk k)
-      | S.ILit i -> let k = fun v -> f (TupleExp (IntV i, v)) in norm_exp e2 (vk k)
-      | S.BLit true -> let k = fun v -> f (TupleExp (IntV 1, v)) in norm_exp e2 (vk k)
-      | S.BLit false -> let k = fun v -> f (TupleExp (IntV 0, v)) in norm_exp e2 (vk k)
-      | _ ->
-          let v1 = fresh_id "v" in
+      (match e2 with
+        S.Var id -> let k = fun v -> f (TupleExp(v, Var id)) in norm_exp e1 (vk k)
+      | S.ILit i -> let k = fun v -> f (TupleExp(v, IntV i)) in norm_exp e1 (vk k)
+      | S.BLit true -> let k = fun v -> f (TupleExp(v, IntV 1)) in norm_exp e1 (vk k)
+      | S.BLit false -> let k = fun v -> f (TupleExp(v, IntV 0)) in norm_exp e1 (vk k)
+      | _ -> 
           let v2 = fresh_id "v" in
-          let (tmp: exp) = norm_exp e2 (fun ce -> LetExp (v2, ce, f (TupleExp (Var v1, Var v2)))) in
-          norm_exp e1 (fun ce -> LetExp (v1, ce, tmp)))
+          let k = fun v -> (norm_exp e2 (fun ce -> LetExp (v2, ce, f (TupleExp(v, Var v2))))) in
+          norm_exp e1 (vk k))
   | S.ProjExp (e', i) ->
       if i != 1 && i != 2 then
         err "only permit <v>.1 or <v>.2"
