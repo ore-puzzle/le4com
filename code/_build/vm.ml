@@ -90,6 +90,7 @@ let string_of_vm prog =
 
 
 (* ==== 仮想機械コードへの変換 ==== *)
+(*let trans_body body =*)
 
 let trans_decl (F.RecDecl (proc_name, params, body)) =
   ProcDecl (proc_name, 1,

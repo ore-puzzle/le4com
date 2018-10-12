@@ -91,8 +91,30 @@ let string_of_vm prog =
 
 (* ==== 仮想機械コードへの変換 ==== *)
 
+let rec trans_value value =
+  match value with
+    Var id -> 
+  | Fun id ->
+  | IntV i ->
+
+let rec trans_cexp cexp =
+  match cexp with
+    ValExp v ->
+  | BinOp (binOp, v1, v2) ->
+  | AppExp (v, v_list) ->
+  | IfExp (v, e1, e2) ->
+  | TupleExp v_list ->
+  | ProjExp (v, i) -> 
+
+let trans_exp exp =
+  match exp with
+    CompExp ce ->
+  | LetExp (id, ce, e) ->
+  | LoopExp (id, ce, e) ->
+  | RecurExp v ->
+
 let trans_decl (F.RecDecl (proc_name, params, body)) =
-  ProcDecl (proc_name, 1,
+  ProcDecl (proc_name, List.length params,
             [Move (0, IntV 1);
              Return (Local 0)])
 

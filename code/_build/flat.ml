@@ -117,7 +117,11 @@ let string_of_flat prog =
 
 let rec fvalue_of_cvalue cvalue env =
     match cvalue with
-      C.Var id -> Environment.lookup id env
+      C.Var id -> 
+       (try
+          Environment.lookup id env
+        with
+          Environment.Not_bound -> err ("Error: " ^ id ^ " id not bound"))
     | C.IntV i -> IntV i
 
 let rec fvalue_list_of_cvalue_list cvalue_list env =
@@ -144,41 +148,40 @@ let rec extend_env_by_id_list id_list env =
 (* ==== フラット化：変数参照と関数参照の区別も同時に行う ==== *)
 
 let flatten exp =
-  (*[RecDecl ("_toplevel", ["p0"; "p1"], CompExp (ValExp (IntV 1)))]*)
-  let rec body_loop exp env decl_list : (exp * decl list)=
+  let rec body_loop exp env : (exp * decl list) =
     match exp with
       C.CompExp ce -> 
        (match ce with
           C.IfExp (v, e1, e2) ->
-            let (new_exp1, new_decl_list1) = body_loop e1 env [] in
-            let (new_exp2, new_decl_list2) = body_loop e2 env [] in
+            let (new_exp1, new_decl_list1) = body_loop e1 env in
+            let (new_exp2, new_decl_list2) = body_loop e2 env in
             (CompExp (IfExp (fvalue_of_cvalue v env, new_exp1, new_exp2)), new_decl_list1 @ new_decl_list2)
         | _ -> (CompExp (fcexp_of_ccexp ce env), []))
     | C.LetExp (id, ce, e) ->
        let new_env = Environment.extend id (Var id) env in
-       let (new_exp, new_decl_list) = body_loop e new_env [] in
+       let (new_exp, new_decl_list) = body_loop e new_env in
         (match ce with
            C.IfExp (v, e1, e2) ->
-             let (new_exp1, new_decl_list1) = body_loop e1 env [] in
-             let (new_exp2, new_decl_list2) = body_loop e2 env [] in
+             let (new_exp1, new_decl_list1) = body_loop e1 env in
+             let (new_exp2, new_decl_list2) = body_loop e2 env in
              (LetExp (id, IfExp ((fvalue_of_cvalue v env), new_exp1, new_exp2), new_exp), new_decl_list1 @ new_decl_list2)
-         | _ -> (LetExp (id, fcexp_of_ccexp ce env, new_exp), []))
+         | _ -> (LetExp (id, fcexp_of_ccexp ce env, new_exp), new_decl_list))
     | C.LetRecExp (id, id_list, e1, e2) -> 
         let new_env1 = extend_env_by_id_list id_list env in
         let new_env2 = Environment.extend id (Fun id) env in
-        let (new_exp1, new_decl_list1) = body_loop e1 new_env1 [] in
-        let (new_exp2, new_decl_list2) = body_loop e2 new_env2 [] in
+        let (new_exp1, new_decl_list1) = body_loop e1 new_env1 in
+        let (new_exp2, new_decl_list2) = body_loop e2 new_env2 in
         (new_exp2, (RecDecl (id, id_list, new_exp1)) :: (new_decl_list1 @ new_decl_list2))
     | C.LoopExp (id, ce, e) ->
         let new_env = Environment.extend id (Var id) env in
-        let (new_exp, new_decl_list) = body_loop e new_env [] in
+        let (new_exp, new_decl_list) = body_loop e new_env in
          (match ce with
             C.IfExp (v, e1, e2) ->
-              let (new_exp1, new_decl_list1) = body_loop e1 env [] in
-              let (new_exp2, new_decl_list2) = body_loop e2 env [] in
+              let (new_exp1, new_decl_list1) = body_loop e1 env in
+              let (new_exp2, new_decl_list2) = body_loop e2 env in
               (LoopExp (id, IfExp ((fvalue_of_cvalue v env), new_exp1, new_exp2), new_exp), new_decl_list1 @ new_decl_list2)
-          | _ -> (LoopExp (id, fcexp_of_ccexp ce env, new_exp), []))
+          | _ -> (LoopExp (id, fcexp_of_ccexp ce env, new_exp), new_decl_list))
     | C.RecurExp v -> (RecurExp (fvalue_of_cvalue v env), [])
   in
-    let (rest_exp, decl_list) = body_loop exp Environment.empty [] in
+    let (rest_exp, decl_list) = body_loop exp Environment.empty in
     decl_list @ [(RecDecl ("_toplevel", ["p0"; "p1"], rest_exp))]
