@@ -89,34 +89,109 @@ let string_of_vm prog =
   String.concat "\n" (List.map string_of_decl prog)
 
 
+(* support function *)
+
+let rec gather_id_from_exp = function
+    F.CompExp (F.IfExp (_, e1, e2)) ->
+      let id_list1 = gather_id_from_exp e1 in
+      let id_list2 = gather_id_from_exp e2 in
+      id_list1 @ id_list2
+  | F.LetExp (id, ce, e)
+  | F.LoopExp (id, ce, e) ->
+      let id_list1 =
+       (match ce with
+          F.IfExp (_, e1, e2) ->
+            let id_list11 = gather_id_from_exp e1 in
+            let id_list12 = gather_id_from_exp e2 in
+            id_list11 @ id_list12
+        | _ -> []) in
+      let id_list2 = gather_id_from_exp e in
+      id :: (id_list1 @ id_list2)
+  | _ -> []
+
+let make_delta params ids =
+  let rec param_loop params index =
+    match params with
+      [] -> []
+    | head :: rest -> (head, Param index) :: param_loop rest (index+1)
+  and id_loop ids index =
+    match ids with
+      [] -> []
+    | head :: rest -> (head, Local index) :: id_loop rest (index+1)
+  in
+    let tuple_list = (param_loop params 0) @ (id_loop ids 1) in
+    let delta var = List.assoc var tuple_list in
+    delta
+
+let fresh_label =
+  let counter = ref 0 in
+  let body str =
+    let v = !counter in
+    counter := v + 1;
+    "L" ^ str ^ (string_of_int v)
+  in
+    body
+
 (* ==== 仮想機械コードへの変換 ==== *)
 
-let rec trans_value value =
-  match value with
-    Var id -> 
-  | Fun id ->
-  | IntV i ->
-
-let rec trans_cexp cexp =
-  match cexp with
-    ValExp v ->
-  | BinOp (binOp, v1, v2) ->
-  | AppExp (v, v_list) ->
-  | IfExp (v, e1, e2) ->
-  | TupleExp v_list ->
-  | ProjExp (v, i) -> 
-
-let trans_exp exp =
-  match exp with
-    CompExp ce ->
-  | LetExp (id, ce, e) ->
-  | LoopExp (id, ce, e) ->
-  | RecurExp v ->
-
 let trans_decl (F.RecDecl (proc_name, params, body)) =
-  ProcDecl (proc_name, List.length params,
-            [Move (0, IntV 1);
-             Return (Local 0)])
+  let rec trans_value value delta is_fun =
+    if is_fun then
+      match value with
+        F.Fun id -> delta id
+      | _ -> err "Error: non_function cannot be applied"
+    else
+      match value with
+        F.Var id
+      | F.Fun id -> delta id
+      | F.IntV i -> IntV i
+
+  and trans_value_list value_list delta =
+    match value_list with
+      [] -> []
+    | head :: rest -> (trans_value head delta false) :: trans_value_list rest delta
+
+  and trans_cexp cexp delta tgt =
+    match cexp with
+      F.ValExp v ->
+        let op = trans_value v delta false in
+        [Move (tgt, op)]
+    | F.BinOp (binOp, v1, v2) ->
+        let op1 = trans_value v1 delta false in
+        let op2 = trans_vlaue v2 delta false in
+        [BinOp (tgt, binOp, op1, op2)]
+    | F.AppExp (v, v_list) ->
+        let op_f = trans_value v delta true in
+        let ops = trans_value_list v_list delta in
+        [Call tgt op_f ops]
+    | F.IfExp (v, e1, e2) ->
+        let op = trans_value v delta false in
+        let l1 = fresh_label proc_name in
+        let l2 = fresh_label proc_name in
+        let branch = BranchIf (op, l1) in
+        let else_case = trans_exp e2 delta tgt in
+        let goto = Goto l2 in
+        let label1 = Label l1 in
+        let then_case = trans_exp e1 delta tgt in
+        let label2 = Label l2 in
+        [branch; else_case; goto; label1; then_case; label2]    
+    | F.TupleExp v_list ->
+    | F.ProjExp (v, i) -> 
+
+  and trans_exp exp delta tgt =
+    match exp with
+      F.CompExp ce -> trans_cexp ce 
+    | F.LetExp (id, ce, e) -> 
+        [trans_cexp ce delta (delta id)
+    | F.LoopExp (id, ce, e) ->
+    | F.RecurExp v ->
+  in
+    let ids = gather_id_from_exp body in
+    let delta = make_delta params ids in
+    let result = trans_exp body delta 0
+    ProcDecl (proc_name, 1,
+              [Move (0, IntV 1);
+               Return (Local 0)])
 
 (* entry point *)
 let trans = List.map trans_decl

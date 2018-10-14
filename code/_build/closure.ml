@@ -196,7 +196,7 @@ let convert exp =
         | _ -> f (cexp_of_ncexp ce (fun ce -> CompExp ce)))
     | N.LetExp (id, ce, e) ->
        (match ce with
-          N.IfExp (v, e1, e2) -> f (CompExp (IfExp (cvalue_of_nvalue v, body_loop e1 f, body_loop e2 f)))
+          N.IfExp (v, e1, e2) -> f (LetExp (id, IfExp (cvalue_of_nvalue v, body_loop e1 f, body_loop e2 f), body_loop e (fun e -> e)))
         | _ -> f (cexp_of_ncexp ce (fun ce' -> LetExp (id, ce', body_loop e (fun e -> e)))))
     | N.LetRecExp (id1, id2, e1, e2) ->
         let (decl_id_list, var_id_list) = gather_id_from_exp e1 ([id1; id2], []) in

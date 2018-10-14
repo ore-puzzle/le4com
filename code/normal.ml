@@ -115,7 +115,7 @@ let rec norm_exp (e: Syntax.exp) (f: cexp -> exp) = match e with
           let k = fun v -> (norm_exp e2 (fun ce -> LetExp (v2, ce, f (BinOp (binOp, v, Var v2))))) in
           norm_exp e1 (vk k))
   | S.IfExp (e1, e2, e3) ->
-      let k = fun v -> f (IfExp (v, norm_exp e2 f, norm_exp e3 f)) in
+      let k = fun v -> f (IfExp (v, norm_exp e2 (fun ce -> CompExp ce), norm_exp e3 (fun ce -> CompExp ce))) in
       norm_exp e1 (vk k)
   | S.LetExp (id, e1, e2) ->
       norm_exp e1 (fun ce -> LetExp (id, ce, norm_exp e2 f))

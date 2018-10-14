@@ -89,10 +89,67 @@ let string_of_vm prog =
   String.concat "\n" (List.map string_of_decl prog)
 
 
+(* support function *)
+(*let make_delta params =
+  let rec body_loop params index =
+    match params with
+      [] -> []
+    | head :: rest -> (head, Param index) :: body_loop rest (index+1)
+  in
+    body_loop params 0
+
+let extend_delta id delta reset =
+  let counter = ref 1 in
+  if reset then
+    counter := 1;
+    []
+  else
+    let v = !counter in
+    counter := v + 1;
+    (id, Local v) :: delta
+
+let make_delta_from_exp exp =
+  let rec body_loop exp index =
+    match exp with
+    CompExp ce -> trans_cexp ce 
+  | LetExp (id, ce, e) ->
+      let new_delta = extend_delta id delta false in
+      
+  | LoopExp (id, ce, e) ->
+  | RecurExp v ->
+  in
+    body_loop exp 1
+  
+
 (* ==== 仮想機械コードへの変換 ==== *)
-(*let trans_body body =*)
+
+let rec trans_value value =
+  match value with
+    Var id -> 
+  | Fun id ->
+  | IntV i ->
+
+let rec trans_cexp cexp =
+  match cexp with
+    ValExp v ->
+  | BinOp (binOp, v1, v2) ->
+  | AppExp (v, v_list) ->
+  | IfExp (v, e1, e2) ->
+  | TupleExp v_list ->
+  | ProjExp (v, i) -> 
+
+let trans_exp exp delta tgt =
+  match exp with
+    CompExp ce -> trans_cexp ce 
+  | LetExp (id, ce, e) ->
+      let new_delta = extend_delta id delta false in
+      
+  | LoopExp (id, ce, e) ->
+  | RecurExp v ->*)
 
 let trans_decl (F.RecDecl (proc_name, params, body)) =
+(*  let delta = make_delta params in
+  let result = trans_exp body delta (Local 0)*)
   ProcDecl (proc_name, 1,
             [Move (0, IntV 1);
              Return (Local 0)])
