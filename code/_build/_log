@@ -12,11 +12,11 @@ ocamlfind ocamldep -modules syntax.ml > syntax.ml.depends # cached
 # Target: syntax.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:syntax.cmo, file:syntax.ml, implem, ocaml, quiet }
 ocamlfind ocamlc -c -o syntax.cmo syntax.ml # cached
 # Target: vm.ml.depends, tags: { extension:ml, file:vm.ml, ocaml, ocamldep, quiet }
-ocamlfind ocamldep -modules vm.ml > vm.ml.depends # cached
+ocamlfind ocamldep -modules vm.ml > vm.ml.depends
 # Target: flat.ml.depends, tags: { extension:ml, file:flat.ml, ocaml, ocamldep, quiet }
 ocamlfind ocamldep -modules flat.ml > flat.ml.depends # cached
 # Target: closure.ml.depends, tags: { extension:ml, file:closure.ml, ocaml, ocamldep, quiet }
-ocamlfind ocamldep -modules closure.ml > closure.ml.depends
+ocamlfind ocamldep -modules closure.ml > closure.ml.depends # cached
 # Target: normal.ml.depends, tags: { extension:ml, file:normal.ml, ocaml, ocamldep, quiet }
 ocamlfind ocamldep -modules normal.ml > normal.ml.depends # cached
 # Target: misc.ml.depends, tags: { extension:ml, file:misc.ml, ocaml, ocamldep, quiet }
@@ -29,33 +29,29 @@ ocamlfind ocamldep -modules pretty.mli > pretty.mli.depends # cached
 ocamlfind ocamlc -c -o pretty.cmi pretty.mli # cached
 # Target: normal.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:normal.cmo, file:normal.ml, implem, ocaml, quiet }
 ocamlfind ocamlc -c -o normal.cmo normal.ml # cached
+# Target: closure.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:closure.cmo, file:closure.ml, implem, ocaml, quiet }
+ocamlfind ocamlc -c -o closure.cmo closure.ml # cached
 # Target: environment.mli.depends, tags: { extension:mli, file:environment.mli, ocaml, ocamldep, quiet }
 ocamlfind ocamldep -modules environment.mli > environment.mli.depends # cached
 # Target: environment.cmi, tags: { byte, compile, extension:mli, file:environment.mli, interf, ocaml, quiet }
 ocamlfind ocamlc -c -o environment.cmi environment.mli # cached
-# Target: closure.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:closure.cmo, file:closure.ml, implem, ocaml, quiet }
-ocamlfind ocamlc -c -o closure.cmo closure.ml
-+ ocamlfind ocamlc -c -o closure.cmo closure.ml
-File "closure.ml", line 120, characters 14-17:
-Warning 40: Var was selected from type N.value.
-It is not visible in the current scope, and will not 
-be selected if the type becomes unknown.
-File "closure.ml", line 116, characters 2-643:
-Warning 8: this pattern-matching is not exhaustive.
-Here is an example of a case that is not matched:
-AppExp (IntV _, _)
-File "closure.ml", line 184, characters 19-64:
-Warning 8: this pattern-matching is not exhaustive.
-Here is an example of a case that is not matched:
-(ValExp _|BinOp (_, _, _)|AppExp (_, _)|IfExp (_, _, _)|ProjExp (_, _))
-File "closure.ml", line 213, characters 12-360:
-Warning 8: this pattern-matching is not exhaustive.
-Here is an example of a case that is not matched:
-[]
 # Target: flat.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:flat.cmo, file:flat.ml, implem, ocaml, quiet }
-ocamlfind ocamlc -c -o flat.cmo flat.ml
+ocamlfind ocamlc -c -o flat.cmo flat.ml # cached
 # Target: vm.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:vm.cmo, file:vm.ml, implem, ocaml, quiet }
 ocamlfind ocamlc -c -o vm.cmo vm.ml
++ ocamlfind ocamlc -c -o vm.cmo vm.ml
+File "vm.ml", line 184, characters 12-27:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+(Param _|Proc _|IntV _)
+File "vm.ml", line 189, characters 12-27:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+(Param _|Proc _|IntV _)
+File "vm.ml", line 193, characters 12-26:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+(Param _|Proc _|IntV _)
 # Target: arm_reg.ml.depends, tags: { extension:ml, file:arm_reg.ml, ocaml, ocamldep, quiet }
 ocamlfind ocamldep -modules arm_reg.ml > arm_reg.ml.depends # cached
 # Target: reg.ml.depends, tags: { extension:ml, file:reg.ml, ocaml, ocamldep, quiet }
@@ -69,7 +65,7 @@ ocamlfind ocamldep -modules mySet.mli > mySet.mli.depends # cached
 # Target: mySet.cmi, tags: { byte, compile, extension:mli, file:mySet.mli, interf, ocaml, quiet }
 ocamlfind ocamlc -c -o mySet.cmi mySet.mli # cached
 # Target: lexer.mll, tags: { extension:mll, file:lexer.mll, lexer, ocaml, ocamllex, quiet }
-/home/ozaki/.opam/4.05.0/bin/ocamllex.opt -q lexer.mll # cached
+/usr/bin/ocamllex -q lexer.mll # cached
 # Target: lexer.ml.depends, tags: { extension:ml, file:lexer.ml, ocaml, ocamldep, quiet }
 ocamlfind ocamldep -modules lexer.ml > lexer.ml.depends # cached
 # Target: parser.mly.depends, tags: { extension:mly, file:parser.mly, infer, menhir_ocamldep, ocaml, ocamldep, quiet }
@@ -118,33 +114,29 @@ ocamlfind ocamldep -modules pretty.ml > pretty.ml.depends # cached
 ocamlfind ocamlopt -c -o pretty.cmx pretty.ml # cached
 # Target: normal.cmx, tags: { compile, extension:cmx, extension:ml, file:normal.cmx, file:normal.ml, implem, native, ocaml, quiet }
 ocamlfind ocamlopt -c -o normal.cmx normal.ml # cached
+# Target: closure.cmx, tags: { compile, extension:cmx, extension:ml, file:closure.cmx, file:closure.ml, implem, native, ocaml, quiet }
+ocamlfind ocamlopt -c -o closure.cmx closure.ml # cached
 # Target: environment.ml.depends, tags: { extension:ml, file:environment.ml, ocaml, ocamldep, quiet }
 ocamlfind ocamldep -modules environment.ml > environment.ml.depends # cached
 # Target: environment.cmx, tags: { compile, extension:cmx, extension:ml, file:environment.cmx, file:environment.ml, implem, native, ocaml, quiet }
 ocamlfind ocamlopt -c -o environment.cmx environment.ml # cached
-# Target: closure.cmx, tags: { compile, extension:cmx, extension:ml, file:closure.cmx, file:closure.ml, implem, native, ocaml, quiet }
-ocamlfind ocamlopt -c -o closure.cmx closure.ml
-+ ocamlfind ocamlopt -c -o closure.cmx closure.ml
-File "closure.ml", line 120, characters 14-17:
-Warning 40: Var was selected from type N.value.
-It is not visible in the current scope, and will not 
-be selected if the type becomes unknown.
-File "closure.ml", line 116, characters 2-643:
-Warning 8: this pattern-matching is not exhaustive.
-Here is an example of a case that is not matched:
-AppExp (IntV _, _)
-File "closure.ml", line 184, characters 19-64:
-Warning 8: this pattern-matching is not exhaustive.
-Here is an example of a case that is not matched:
-(ValExp _|BinOp (_, _, _)|AppExp (_, _)|IfExp (_, _, _)|ProjExp (_, _))
-File "closure.ml", line 213, characters 12-360:
-Warning 8: this pattern-matching is not exhaustive.
-Here is an example of a case that is not matched:
-[]
 # Target: flat.cmx, tags: { compile, extension:cmx, extension:ml, file:flat.cmx, file:flat.ml, implem, native, ocaml, quiet }
-ocamlfind ocamlopt -c -o flat.cmx flat.ml
+ocamlfind ocamlopt -c -o flat.cmx flat.ml # cached
 # Target: vm.cmx, tags: { compile, extension:cmx, extension:ml, file:vm.cmx, file:vm.ml, implem, native, ocaml, quiet }
 ocamlfind ocamlopt -c -o vm.cmx vm.ml
++ ocamlfind ocamlopt -c -o vm.cmx vm.ml
+File "vm.ml", line 184, characters 12-27:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+(Param _|Proc _|IntV _)
+File "vm.ml", line 189, characters 12-27:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+(Param _|Proc _|IntV _)
+File "vm.ml", line 193, characters 12-26:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+(Param _|Proc _|IntV _)
 # Target: reg.cmx, tags: { compile, extension:cmx, extension:ml, file:reg.cmx, file:reg.ml, implem, native, ocaml, quiet }
 ocamlfind ocamlopt -c -o reg.cmx reg.ml
 # Target: mySet.ml.depends, tags: { extension:ml, file:mySet.ml, ocaml, ocamldep, quiet }

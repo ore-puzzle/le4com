@@ -109,7 +109,7 @@ let rec gather_id_from_exp = function
       id :: (id_list1 @ id_list2)
   | _ -> []
 
-let make_delta params ids =
+let make_delta params ids proc_name =
   let rec param_loop params index =
     match params with
       [] -> []
@@ -119,7 +119,7 @@ let make_delta params ids =
       [] -> []
     | head :: rest -> (head, Local index) :: id_loop rest (index+1)
   in
-    let tuple_list = (param_loop params 0) @ (id_loop ids 1) in
+    let tuple_list = (id_loop ids 1) @ (param_loop params 0) in
     let delta var = List.assoc var tuple_list in
     delta
 
@@ -128,70 +128,82 @@ let fresh_label =
   let body str =
     let v = !counter in
     counter := v + 1;
-    "L" ^ str ^ (string_of_int v)
+    "L" ^ str ^ "_" ^ (string_of_int v)
   in
     body
 
 (* ==== 仮想機械コードへの変換 ==== *)
 
 let trans_decl (F.RecDecl (proc_name, params, body)) =
-  let rec trans_value value delta is_fun =
-    if is_fun then
-      match value with
-        F.Fun id -> delta id
-      | _ -> err "Error: non_function cannot be applied"
-    else
-      match value with
-        F.Var id
-      | F.Fun id -> delta id
-      | F.IntV i -> IntV i
+  let rec trans_value value delta =
+    match value with
+      F.Var id -> delta id
+    | F.Fun id -> Proc id
+    | F.IntV i -> IntV i
 
   and trans_value_list value_list delta =
     match value_list with
       [] -> []
-    | head :: rest -> (trans_value head delta false) :: trans_value_list rest delta
+    | head :: rest -> (trans_value head delta) :: trans_value_list rest delta
 
-  and trans_cexp cexp delta tgt =
+  and trans_cexp cexp delta tgt loop_var lbl =
     match cexp with
       F.ValExp v ->
-        let op = trans_value v delta false in
+        let op = trans_value v delta in
         [Move (tgt, op)]
     | F.BinOp (binOp, v1, v2) ->
-        let op1 = trans_value v1 delta false in
-        let op2 = trans_vlaue v2 delta false in
+        let op1 = trans_value v1 delta in
+        let op2 = trans_value v2 delta in
         [BinOp (tgt, binOp, op1, op2)]
     | F.AppExp (v, v_list) ->
-        let op_f = trans_value v delta true in
+        let op_f = trans_value v delta in
         let ops = trans_value_list v_list delta in
-        [Call tgt op_f ops]
+        [Call (tgt, op_f, ops)]
     | F.IfExp (v, e1, e2) ->
-        let op = trans_value v delta false in
+        let op = trans_value v delta in
         let l1 = fresh_label proc_name in
         let l2 = fresh_label proc_name in
         let branch = BranchIf (op, l1) in
-        let else_case = trans_exp e2 delta tgt in
+        let else_case = trans_exp e2 delta tgt loop_var lbl in
         let goto = Goto l2 in
         let label1 = Label l1 in
-        let then_case = trans_exp e1 delta tgt in
+        let then_case = trans_exp e1 delta tgt loop_var lbl in
         let label2 = Label l2 in
-        [branch; else_case; goto; label1; then_case; label2]    
+        (branch :: else_case) @ (goto :: label1 :: then_case) @ [label2]
     | F.TupleExp v_list ->
-    | F.ProjExp (v, i) -> 
+        let ops = trans_value_list v_list delta in
+        [Malloc (tgt, ops)]
+    | F.ProjExp (v, i) ->
+        let op = trans_value v delta in
+        [Read (tgt, op, i)] 
 
-  and trans_exp exp delta tgt =
+  and trans_exp exp delta tgt loop_var lbl =
     match exp with
-      F.CompExp ce -> trans_cexp ce 
-    | F.LetExp (id, ce, e) -> 
-        [trans_cexp ce delta (delta id)
+      F.CompExp ce -> trans_cexp ce delta tgt loop_var lbl
+    | F.LetExp (id, ce, e) ->
+        let (Local new_tgt) = delta id in
+        let bind = trans_cexp ce delta new_tgt loop_var lbl in
+        let eval = trans_exp e delta tgt loop_var lbl in
+        bind @ eval
     | F.LoopExp (id, ce, e) ->
+        let (Local new_tgt) = delta id in
+        let bind = trans_cexp ce delta new_tgt loop_var lbl in
+        let l = fresh_label proc_name in
+        let label = Label l in
+        let (Local new_id) = delta id in
+        let eval = trans_exp e delta tgt new_id l in
+        bind @ (label :: eval)
     | F.RecurExp v ->
+        let op = trans_value v delta in
+        let subst = Move (loop_var, op) in
+        let goto = Goto lbl in
+        [subst; goto]
   in
     let ids = gather_id_from_exp body in
-    let delta = make_delta params ids in
-    let result = trans_exp body delta 0
-    ProcDecl (proc_name, 1,
-              [Move (0, IntV 1);
-               Return (Local 0)])
+    let delta = make_delta params ids proc_name in
+    let instrs = trans_exp body delta 0 0 "dummy" in
+    ProcDecl (proc_name, (List.length ids) + 1, 
+              instrs @ [Return (Local 0)])
 
 (* entry point *)
 let trans = List.map trans_decl
