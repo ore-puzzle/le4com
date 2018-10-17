@@ -8,6 +8,7 @@ type id = S.id
 type binOp = S.binOp
 
 let fresh_id = Misc.fresh_id_maker "_"
+let pre_fresh_id = Misc.fresh_id_maker "$"
 
 (* ==== 値 ==== *)
 type value =
@@ -97,6 +98,61 @@ let vk k ce =
   | _ -> 
       let v = fresh_id "v" in LetExp (v, ce, k (Var v))
 
+let rename exp id =
+  let new_id = pre_fresh_id id in
+  let rec body_loop exp =
+    match exp with
+      S.Var id' when id = id' -> S.Var new_id
+    | S.BinOp (binOp, e1, e2) -> S.BinOp (binOp, body_loop e1, body_loop e2)
+    | S.IfExp (e1, e2, e3) -> S.IfExp (body_loop e1, body_loop e2, body_loop e3)
+    | S.LetExp (id', e1, e2) -> 
+        if id = id' then S.LetExp (new_id, e1, body_loop e2)
+        else S.LetExp (id', e1, body_loop e2)
+    | S.AppExp (e1, e2) -> S.AppExp (body_loop e1, body_loop e2)
+    | S.LetRecExp (id1, id2, e1, e2) ->
+        if id = id1 then S.LetRecExp (new_id, id2, e1, body_loop e2)
+        else S.LetRecExp (id1, id2, e1, body_loop e2)
+    | S.LoopExp (id', e1, e2) ->
+        if id = id' then S.LoopExp (new_id, e1, body_loop e2)
+        else S.LoopExp (id', e1, body_loop e2)
+    | S.RecurExp e -> S.RecurExp (body_loop e)
+    | S.TupleExp (e1, e2) -> S.TupleExp (body_loop e1, body_loop e2)
+    | S.ProjExp (e, i) -> S.ProjExp (body_loop e, i)
+    | _ -> exp
+  in
+    body_loop exp
+
+let rec preprocess exp id_list =
+  match exp with
+      S.BinOp (binOp, e1, e2) -> 
+        S.BinOp (binOp, preprocess e1 id_list, preprocess e2 id_list)
+    | S.IfExp (e1, e2, e3) -> 
+        S.IfExp (preprocess e1 id_list, preprocess e2 id_list, preprocess e3 id_list)
+    | S.LetExp (id, e1, e2) -> 
+        if List.mem id id_list then 
+          let S.LetExp (id', e1', e2') = rename exp id in
+          S.LetExp (id', preprocess e1' id_list, preprocess e2' (id' :: id_list))
+        else 
+          S.LetExp (id, preprocess e1 id_list, preprocess e2 (id :: id_list))
+    | S.AppExp (e1, e2) -> S.AppExp (preprocess e1 id_list, preprocess e2 id_list)
+    | S.LetRecExp (id1, id2, e1, e2) ->
+        if List.mem id1 id_list then 
+          let S.LetRecExp (id1', id2', e1', e2') = rename exp id1 in
+          S.LetRecExp (id1', id2', preprocess e1' id_list, preprocess e2' (id1' :: id_list))
+        else 
+          S.LetRecExp (id1, id2, preprocess e1 id_list, preprocess e2 (id1 :: id_list))
+    | S.LoopExp (id, e1, e2) ->
+        if List.mem id id_list then 
+          let S.LoopExp (id', e1', e2') = rename exp id in
+          S.LoopExp (id', preprocess e1' id_list, preprocess e2' (id' :: id_list))
+        else 
+          S.LoopExp (id, preprocess e1 id_list, preprocess e2 (id :: id_list))
+    | S.RecurExp e -> S.RecurExp (preprocess e id_list)
+    | S.TupleExp (e1, e2) -> S.TupleExp (preprocess e1 id_list, preprocess e2 id_list)
+    | S.ProjExp (e, i) -> S.ProjExp (preprocess e id_list, i)
+    | _ -> exp
+    
+
 (* ==== 正規形への変換 ==== *)
 
 let rec norm_exp (e: Syntax.exp) (f: cexp -> exp) = match e with
@@ -161,4 +217,7 @@ and normalize e = norm_exp e (fun ce -> CompExp ce)
 
 (* ==== entry point ==== *)
 let convert prog =
-  normalize prog
+  let preprocessed_prog = preprocess prog [] in
+  normalize preprocessed_prog
+
+

@@ -53,7 +53,7 @@ let recur_check e =
     | RecurExp e' ->
         if is_end then
           body_loop e' true
-        else err "recur must be the end"
+        else err "Error: recur must be the end"
   in
     body_loop e true
 
