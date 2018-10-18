@@ -2,7 +2,7 @@
 # Target: main.ml.depends, tags: { extension:ml, file:main.ml, ocaml, ocamldep, quiet }
 ocamlfind ocamldep -modules main.ml > main.ml.depends # cached
 # Target: arm_noreg.ml.depends, tags: { extension:ml, file:arm_noreg.ml, ocaml, ocamldep, quiet }
-ocamlfind ocamldep -modules arm_noreg.ml > arm_noreg.ml.depends # cached
+ocamlfind ocamldep -modules arm_noreg.ml > arm_noreg.ml.depends
 # Target: arm_spec.ml.depends, tags: { extension:ml, file:arm_spec.ml, ocaml, ocamldep, quiet }
 ocamlfind ocamldep -modules arm_spec.ml > arm_spec.ml.depends # cached
 # Target: arm_spec.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:arm_spec.cmo, file:arm_spec.ml, implem, ocaml, quiet }
@@ -18,7 +18,7 @@ ocamlfind ocamldep -modules flat.ml > flat.ml.depends # cached
 # Target: closure.ml.depends, tags: { extension:ml, file:closure.ml, ocaml, ocamldep, quiet }
 ocamlfind ocamldep -modules closure.ml > closure.ml.depends # cached
 # Target: normal.ml.depends, tags: { extension:ml, file:normal.ml, ocaml, ocamldep, quiet }
-ocamlfind ocamldep -modules normal.ml > normal.ml.depends
+ocamlfind ocamldep -modules normal.ml > normal.ml.depends # cached
 # Target: misc.ml.depends, tags: { extension:ml, file:misc.ml, ocaml, ocamldep, quiet }
 ocamlfind ocamldep -modules misc.ml > misc.ml.depends # cached
 # Target: misc.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:misc.cmo, file:misc.ml, implem, ocaml, quiet }
@@ -28,26 +28,7 @@ ocamlfind ocamldep -modules pretty.mli > pretty.mli.depends # cached
 # Target: pretty.cmi, tags: { byte, compile, extension:mli, file:pretty.mli, interf, ocaml, quiet }
 ocamlfind ocamlc -c -o pretty.cmi pretty.mli # cached
 # Target: normal.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:normal.cmo, file:normal.ml, implem, ocaml, quiet }
-ocamlfind ocamlc -c -o normal.cmo normal.ml
-+ ocamlfind ocamlc -c -o normal.cmo normal.ml
-File "normal.ml", line 133, characters 14-38:
-Warning 8: this pattern-matching is not exhaustive.
-Here is an example of a case that is not matched:
-(Var _|ILit _|BLit _|BinOp (_, _, _)|IfExp (_, _, _)|FunExp (_, _)|
-AppExp (_, _)|LetRecExp (_, _, _, _)|LoopExp (_, _, _)|RecurExp _|
-TupleExp (_, _)|ProjExp (_, _))
-File "normal.ml", line 140, characters 14-48:
-Warning 8: this pattern-matching is not exhaustive.
-Here is an example of a case that is not matched:
-(Var _|ILit _|BLit _|BinOp (_, _, _)|IfExp (_, _, _)|LetExp (_, _, _)|
-FunExp (_, _)|AppExp (_, _)|LoopExp (_, _, _)|RecurExp _|TupleExp (_, _)|
-ProjExp (_, _))
-File "normal.ml", line 146, characters 14-39:
-Warning 8: this pattern-matching is not exhaustive.
-Here is an example of a case that is not matched:
-(Var _|ILit _|BLit _|BinOp (_, _, _)|IfExp (_, _, _)|LetExp (_, _, _)|
-FunExp (_, _)|AppExp (_, _)|LetRecExp (_, _, _, _)|RecurExp _|
-TupleExp (_, _)|ProjExp (_, _))
+ocamlfind ocamlc -c -o normal.cmo normal.ml # cached
 # Target: closure.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:closure.cmo, file:closure.ml, implem, ocaml, quiet }
 ocamlfind ocamlc -c -o closure.cmo closure.ml # cached
 # Target: environment.mli.depends, tags: { extension:mli, file:environment.mli, ocaml, ocamldep, quiet }
@@ -58,8 +39,6 @@ ocamlfind ocamlc -c -o environment.cmi environment.mli # cached
 ocamlfind ocamlc -c -o flat.cmo flat.ml # cached
 # Target: vm.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:vm.cmo, file:vm.ml, implem, ocaml, quiet }
 ocamlfind ocamlc -c -o vm.cmo vm.ml # cached
-# Target: arm_noreg.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:arm_noreg.cmo, file:arm_noreg.ml, implem, ocaml, quiet }
-ocamlfind ocamlc -c -o arm_noreg.cmo arm_noreg.ml # cached
 # Target: arm_reg.ml.depends, tags: { extension:ml, file:arm_reg.ml, ocaml, ocamldep, quiet }
 ocamlfind ocamldep -modules arm_reg.ml > arm_reg.ml.depends # cached
 # Target: reg.ml.depends, tags: { extension:ml, file:reg.ml, ocaml, ocamldep, quiet }
@@ -68,6 +47,10 @@ ocamlfind ocamldep -modules reg.ml > reg.ml.depends # cached
 ocamlfind ocamlc -c -o reg.cmo reg.ml # cached
 # Target: arm_reg.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:arm_reg.cmo, file:arm_reg.ml, implem, ocaml, quiet }
 ocamlfind ocamlc -c -o arm_reg.cmo arm_reg.ml # cached
+# Target: arm_simulator.ml.depends, tags: { extension:ml, file:arm_simulator.ml, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -modules arm_simulator.ml > arm_simulator.ml.depends # cached
+# Target: arm_simulator.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:arm_simulator.cmo, file:arm_simulator.ml, implem, ocaml, quiet }
+ocamlfind ocamlc -c -o arm_simulator.cmo arm_simulator.ml # cached
 # Target: cfg.ml.depends, tags: { extension:ml, file:cfg.ml, ocaml, ocamldep, quiet }
 ocamlfind ocamldep -modules cfg.ml > cfg.ml.depends # cached
 # Target: mySet.mli.depends, tags: { extension:mli, file:mySet.mli, ocaml, ocamldep, quiet }
@@ -77,7 +60,7 @@ ocamlfind ocamlc -c -o mySet.cmi mySet.mli # cached
 # Target: cfg.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:cfg.cmo, file:cfg.ml, implem, ocaml, quiet }
 ocamlfind ocamlc -c -o cfg.cmo cfg.ml # cached
 # Target: lexer.mll, tags: { extension:mll, file:lexer.mll, lexer, ocaml, ocamllex, quiet }
-/home/ozaki/.opam/4.05.0/bin/ocamllex.opt -q lexer.mll # cached
+/usr/bin/ocamllex -q lexer.mll # cached
 # Target: lexer.ml.depends, tags: { extension:ml, file:lexer.ml, ocaml, ocamldep, quiet }
 ocamlfind ocamldep -modules lexer.ml > lexer.ml.depends # cached
 # Target: parser.mly.depends, tags: { extension:mly, file:parser.mly, infer, menhir_ocamldep, ocaml, ocamldep, quiet }
@@ -106,6 +89,25 @@ ocamlfind ocamldep -modules live.ml > live.ml.depends # cached
 ocamlfind ocamlc -c -o live.cmo live.ml # cached
 # Target: opt.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:opt.cmo, file:opt.ml, implem, ocaml, quiet }
 ocamlfind ocamlc -c -o opt.cmo opt.ml # cached
+# Target: arm_noreg.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:arm_noreg.cmo, file:arm_noreg.ml, implem, ocaml, quiet }
+ocamlfind ocamlc -c -o arm_noreg.cmo arm_noreg.ml
++ ocamlfind ocamlc -c -o arm_noreg.cmo arm_noreg.ml
+File "arm_noreg.ml", line 64, characters 12-16:
+Warning 40: Plus was selected from type Vm.S.binOp.
+It is not visible in the current scope, and will not 
+be selected if the type becomes unknown.
+File "arm_noreg.ml", line 65, characters 12-16:
+Warning 40: Mult was selected from type Vm.S.binOp.
+It is not visible in the current scope, and will not 
+be selected if the type becomes unknown.
+File "arm_noreg.ml", line 66, characters 12-14:
+Warning 40: Lt was selected from type Vm.S.binOp.
+It is not visible in the current scope, and will not 
+be selected if the type becomes unknown.
+File "arm_noreg.ml", line 57, characters 18-1976:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+(BEGIN _|END _)
 # Target: main.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:main.cmo, file:main.ml, implem, ocaml, quiet }
 ocamlfind ocamlc -c -o main.cmo main.ml # cached
 # Target: arm_spec.cmx, tags: { compile, extension:cmx, extension:ml, file:arm_spec.cmx, file:arm_spec.ml, implem, native, ocaml, quiet }
@@ -119,26 +121,7 @@ ocamlfind ocamldep -modules pretty.ml > pretty.ml.depends # cached
 # Target: pretty.cmx, tags: { compile, extension:cmx, extension:ml, file:pretty.cmx, file:pretty.ml, implem, native, ocaml, quiet }
 ocamlfind ocamlopt -c -o pretty.cmx pretty.ml # cached
 # Target: normal.cmx, tags: { compile, extension:cmx, extension:ml, file:normal.cmx, file:normal.ml, implem, native, ocaml, quiet }
-ocamlfind ocamlopt -c -o normal.cmx normal.ml
-+ ocamlfind ocamlopt -c -o normal.cmx normal.ml
-File "normal.ml", line 133, characters 14-38:
-Warning 8: this pattern-matching is not exhaustive.
-Here is an example of a case that is not matched:
-(Var _|ILit _|BLit _|BinOp (_, _, _)|IfExp (_, _, _)|FunExp (_, _)|
-AppExp (_, _)|LetRecExp (_, _, _, _)|LoopExp (_, _, _)|RecurExp _|
-TupleExp (_, _)|ProjExp (_, _))
-File "normal.ml", line 140, characters 14-48:
-Warning 8: this pattern-matching is not exhaustive.
-Here is an example of a case that is not matched:
-(Var _|ILit _|BLit _|BinOp (_, _, _)|IfExp (_, _, _)|LetExp (_, _, _)|
-FunExp (_, _)|AppExp (_, _)|LoopExp (_, _, _)|RecurExp _|TupleExp (_, _)|
-ProjExp (_, _))
-File "normal.ml", line 146, characters 14-39:
-Warning 8: this pattern-matching is not exhaustive.
-Here is an example of a case that is not matched:
-(Var _|ILit _|BLit _|BinOp (_, _, _)|IfExp (_, _, _)|LetExp (_, _, _)|
-FunExp (_, _)|AppExp (_, _)|LetRecExp (_, _, _, _)|RecurExp _|
-TupleExp (_, _)|ProjExp (_, _))
+ocamlfind ocamlopt -c -o normal.cmx normal.ml # cached
 # Target: closure.cmx, tags: { compile, extension:cmx, extension:ml, file:closure.cmx, file:closure.ml, implem, native, ocaml, quiet }
 ocamlfind ocamlopt -c -o closure.cmx closure.ml # cached
 # Target: environment.ml.depends, tags: { extension:ml, file:environment.ml, ocaml, ocamldep, quiet }
@@ -149,12 +132,12 @@ ocamlfind ocamlopt -c -o environment.cmx environment.ml # cached
 ocamlfind ocamlopt -c -o flat.cmx flat.ml # cached
 # Target: vm.cmx, tags: { compile, extension:cmx, extension:ml, file:vm.cmx, file:vm.ml, implem, native, ocaml, quiet }
 ocamlfind ocamlopt -c -o vm.cmx vm.ml # cached
-# Target: arm_noreg.cmx, tags: { compile, extension:cmx, extension:ml, file:arm_noreg.cmx, file:arm_noreg.ml, implem, native, ocaml, quiet }
-ocamlfind ocamlopt -c -o arm_noreg.cmx arm_noreg.ml # cached
 # Target: reg.cmx, tags: { compile, extension:cmx, extension:ml, file:reg.cmx, file:reg.ml, implem, native, ocaml, quiet }
 ocamlfind ocamlopt -c -o reg.cmx reg.ml # cached
 # Target: arm_reg.cmx, tags: { compile, extension:cmx, extension:ml, file:arm_reg.cmx, file:arm_reg.ml, implem, native, ocaml, quiet }
 ocamlfind ocamlopt -c -o arm_reg.cmx arm_reg.ml # cached
+# Target: arm_simulator.cmx, tags: { compile, extension:cmx, extension:ml, file:arm_simulator.cmx, file:arm_simulator.ml, implem, native, ocaml, quiet }
+ocamlfind ocamlopt -c -o arm_simulator.cmx arm_simulator.ml # cached
 # Target: mySet.ml.depends, tags: { extension:ml, file:mySet.ml, ocaml, ocamldep, quiet }
 ocamlfind ocamldep -modules mySet.ml > mySet.ml.depends # cached
 # Target: mySet.cmx, tags: { compile, extension:cmx, extension:ml, file:mySet.cmx, file:mySet.ml, implem, native, ocaml, quiet }
@@ -177,8 +160,27 @@ ocamlfind ocamlopt -c -o dfa.cmx dfa.ml # cached
 ocamlfind ocamlopt -c -o live.cmx live.ml # cached
 # Target: opt.cmx, tags: { compile, extension:cmx, extension:ml, file:opt.cmx, file:opt.ml, implem, native, ocaml, quiet }
 ocamlfind ocamlopt -c -o opt.cmx opt.ml # cached
+# Target: arm_noreg.cmx, tags: { compile, extension:cmx, extension:ml, file:arm_noreg.cmx, file:arm_noreg.ml, implem, native, ocaml, quiet }
+ocamlfind ocamlopt -c -o arm_noreg.cmx arm_noreg.ml
++ ocamlfind ocamlopt -c -o arm_noreg.cmx arm_noreg.ml
+File "arm_noreg.ml", line 64, characters 12-16:
+Warning 40: Plus was selected from type Vm.S.binOp.
+It is not visible in the current scope, and will not 
+be selected if the type becomes unknown.
+File "arm_noreg.ml", line 65, characters 12-16:
+Warning 40: Mult was selected from type Vm.S.binOp.
+It is not visible in the current scope, and will not 
+be selected if the type becomes unknown.
+File "arm_noreg.ml", line 66, characters 12-14:
+Warning 40: Lt was selected from type Vm.S.binOp.
+It is not visible in the current scope, and will not 
+be selected if the type becomes unknown.
+File "arm_noreg.ml", line 57, characters 18-1976:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+(BEGIN _|END _)
 # Target: main.cmx, tags: { compile, extension:cmx, extension:ml, file:main.cmx, file:main.ml, implem, native, ocaml, quiet }
-ocamlfind ocamlopt -c -o main.cmx main.ml # cached
+ocamlfind ocamlopt -c -o main.cmx main.ml
 # Target: main.native, tags: { dont_link_with, extension:native, file:main.native, link, native, ocaml, program, quiet }
-ocamlfind ocamlopt -linkpkg arm_spec.cmx misc.cmx pretty.cmx syntax.cmx normal.cmx closure.cmx environment.cmx flat.cmx vm.cmx arm_noreg.cmx reg.cmx arm_reg.cmx mySet.cmx cfg.cmx myMap.cmx dfa.cmx parser.cmx lexer.cmx live.cmx opt.cmx main.cmx -o main.native
+ocamlfind ocamlopt -linkpkg arm_spec.cmx misc.cmx pretty.cmx syntax.cmx normal.cmx closure.cmx environment.cmx flat.cmx vm.cmx arm_noreg.cmx reg.cmx arm_reg.cmx arm_simulator.cmx mySet.cmx cfg.cmx myMap.cmx dfa.cmx parser.cmx lexer.cmx live.cmx opt.cmx main.cmx -o main.native
 # Compilation successful.

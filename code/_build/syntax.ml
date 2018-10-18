@@ -23,7 +23,7 @@ type exp =
 (* ==== recur式が末尾位置にのみ書かれていることを検査 ==== *)
 
 let recur_check e = 
-  let rec body_loop e is_end =
+  let rec body_loop e is_end = (* is_endは今末尾位置にいるならtrue,そうでないならfalse *)
     match e with
       Var _
     | ILit _ 
@@ -33,18 +33,10 @@ let recur_check e =
     | TupleExp (e1, e2) ->
         body_loop e1 false; body_loop e2 false      
     | IfExp (e1, e2, e3) ->
-        body_loop e1 false;
-        if is_end then
-          (body_loop e2 true; body_loop e3 true)
-        else
-          body_loop e2 false; body_loop e3 false
+        body_loop e1 false; body_loop e2 is_end; body_loop e3 is_end
     | LetExp (_, e1, e2)     
     | LetRecExp (_, _, e1, e2) ->
-        body_loop e1 false;
-        if is_end then
-          body_loop e2 true
-        else
-          body_loop e2 false
+        body_loop e1 false; body_loop e2 is_end
     | FunExp (_, e')
     | ProjExp (e', _) ->
         body_loop e' false
@@ -55,6 +47,6 @@ let recur_check e =
           body_loop e' true
         else err "Error: recur must be the end"
   in
-    body_loop e true
+    body_loop e false
 
         
