@@ -116,9 +116,8 @@ let cexp_of_ncexp ncexp (f: cexp -> exp) =
   match ncexp with
     N.ValExp value -> f (ValExp (cvalue_of_nvalue value))
   | N.BinOp (binOp, v1, v2) -> f (BinOp (binOp, cvalue_of_nvalue v1, cvalue_of_nvalue v2))
-  (*| N.AppExp (v1, v2) -> f (AppExp (cvalue_of_nvalue v1, [cvalue_of_nvalue v2]))*)
   | N.AppExp (Var id, v) ->
-      let new_id = fresh_id ("r_" ^ id) in
+      let new_id = "_r_" ^ id in
       LetExp (new_id, ProjExp (Var id, 0), f (AppExp (Var new_id, [Var id; cvalue_of_nvalue v])))
   | N.IfExp _ -> err "For debug: This error must not be raised at closure"
   | N.TupleExp (v1, v2) -> f (TupleExp [cvalue_of_nvalue v1; cvalue_of_nvalue v2])
@@ -203,7 +202,7 @@ let convert exp =
         let (decl_id_set, var_id_set) = (delete_duplication decl_id_list [], delete_duplication var_id_list []) in
         let free_var_id = diff var_id_set decl_id_set in
         let free_var = var_of_id free_var_id in
-        let new_id = fresh_id ("b_" ^ id1) in
+        let new_id = "_b_" ^ id1 in
         let closure = TupleExp [Var new_id] in
         if List.length free_var = 0 then
           let converted = body_loop e1 f in
