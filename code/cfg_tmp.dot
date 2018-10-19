@@ -1,9 +1,16 @@
 digraph CFG {
   node [shape=record fontname="courier"]
-  _toplevel0 [label="{_toplevel:\l|\<BEGIN: _toplevel\>\l}"];
-  _toplevel1 [label="{move  t0, 1\lret  t0\l}"];
-  _toplevel2 [label="{\<END: _toplevel\>\l}"];
+  _toplevel0 [label="{_toplevel:\l|\{\}\l\<BEGIN: _toplevel\>\l\{\}\l}"];
+  _toplevel1 [label="{\{\}\lmove  t1, 1\l\{(t1, 10)\}\llt  t2, t1, 10\l\{(t1, 10), (t2, 11)\}\lbif  t2, L_toplevel_0\l\{(t1, 10), (t2, 11)\}\l}"];
+  _toplevel2 [label="{\{(t1, 10), (t2, 11)\}\lmove  t4, 10\l\{(t1, 10), (t2, 11), (t4, 20)\}\lmove  t3, t4\l\{(t1, 10), (t2, 11), (t3, 21), (t4, 20)\}\lgoto  L_toplevel_1\l\{(t1, 10), (t2, 11), (t3, 21), (t4, 20)\}\l}"];
+  _toplevel3 [label="{L_toplevel_0:\l|\{(t1, 10), (t2, 11)\}\lmove  t4, t1\l\{(t1, 10), (t2, 11), (t4, 30)\}\lmove  t3, t4\l\{(t1, 10), (t2, 11), (t3, 31), (t4, 30)\}\l}"];
+  _toplevel4 [label="{L_toplevel_1:\l|\{(t1, 10), (t2, 11), (t3, 21), (t3, 31), (t4, 20), (t4, 30)\}\lmove  t0, t3\l\{(t0, 40), (t1, 10), (t2, 11), (t3, 21), (t3, 31), (t4, 20), (t4, 30)\}\lret  t0\l\{(t0, 40), (t1, 10), (t2, 11), (t3, 21), (t3, 31), (t4, 20), (t4, 30)\}\l}"];
+  _toplevel5 [label="{\{(t0, 40), (t1, 10), (t2, 11), (t3, 21), (t3, 31), (t4, 20), (t4, 30)\}\l\<END: _toplevel\>\l\{(t0, 40), (t1, 10), (t2, 11), (t3, 21), (t3, 31), (t4, 20), (t4, 30)\}\l}"];
 
   _toplevel0 -> _toplevel1
+  _toplevel1 -> _toplevel3
   _toplevel1 -> _toplevel2
+  _toplevel2 -> _toplevel4
+  _toplevel3 -> _toplevel4
+  _toplevel4 -> _toplevel5
   }

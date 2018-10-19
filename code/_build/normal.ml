@@ -100,25 +100,22 @@ let vk k ce =
       let v = fresh_id "v" in LetExp (v, ce, k (Var v))
 
 (* exp中のすべてのidをnew_idに置き換える *)
-let rename exp id =
-  let new_id = 
-    if id.[0] = '$' then pre_fresh_id (String.sub id 1 ((String.length id) - 2)) (* $が増えていくことを防ぐ *)
-    else pre_fresh_id id in
+let rename exp id new_id =
   let rec body_loop exp =
     match exp with
       S.Var id' when id = id' -> S.Var new_id
     | S.BinOp (binOp, e1, e2) -> S.BinOp (binOp, body_loop e1, body_loop e2)
     | S.IfExp (e1, e2, e3) -> S.IfExp (body_loop e1, body_loop e2, body_loop e3)
     | S.LetExp (id', e1, e2) -> 
-        if id = id' then S.LetExp (new_id, e1, body_loop e2)
-        else S.LetExp (id', e1, body_loop e2)
+        if id = id' then S.LetExp (new_id, body_loop e1, body_loop e2)
+        else S.LetExp (id', body_loop e1, body_loop e2)
     | S.AppExp (e1, e2) -> S.AppExp (body_loop e1, body_loop e2)
     | S.LetRecExp (id1, id2, e1, e2) ->
-        if id = id1 then S.LetRecExp (new_id, id2, e1, body_loop e2)
-        else S.LetRecExp (id1, id2, e1, body_loop e2)
+        if id = id1 then S.LetRecExp (new_id, id2, body_loop e1, body_loop e2)
+        else S.LetRecExp (id1, id2, body_loop e1, body_loop e2)
     | S.LoopExp (id', e1, e2) ->
-        if id = id' then S.LoopExp (new_id, e1, body_loop e2)
-        else S.LoopExp (id', e1, body_loop e2)
+        if id = id' then S.LoopExp (new_id, body_loop e1, body_loop e2)
+        else S.LoopExp (id', body_loop e1, body_loop e2)
     | S.RecurExp e -> S.RecurExp (body_loop e)
     | S.TupleExp (e1, e2) -> S.TupleExp (body_loop e1, body_loop e2)
     | S.ProjExp (e, i) -> S.ProjExp (body_loop e, i)
@@ -135,22 +132,29 @@ let rec preprocess exp id_list = (* id_listは束縛されているidの集合 *
         S.IfExp (preprocess e1 id_list, preprocess e2 id_list, preprocess e3 id_list)
     | S.LetExp (id, e1, e2) -> 
         if List.mem id id_list then 
-          let S.LetExp (id', e1', e2') = rename exp id in
-          S.LetExp (id', preprocess e1' id_list, preprocess e2' (id' :: id_list))
-        else 
+          let new_id = 
+            if id.[0] = '$' then pre_fresh_id (String.sub id 1 ((String.length id) - 2)) (* $が増えていくことを防ぐ *)
+            else pre_fresh_id id in
+          S.LetExp (new_id, preprocess e1 id_list, preprocess (rename e2 id new_id) (new_id :: id_list))
+        else
           S.LetExp (id, preprocess e1 id_list, preprocess e2 (id :: id_list))
     | S.AppExp (e1, e2) -> S.AppExp (preprocess e1 id_list, preprocess e2 id_list)
     | S.LetRecExp (id1, id2, e1, e2) ->
         if List.mem id1 id_list then 
-          let S.LetRecExp (id1', id2', e1', e2') = rename exp id1 in
-          S.LetRecExp (id1', id2', preprocess e1' id_list, preprocess e2' (id1' :: id_list))
+          let new_id = 
+            if id1.[0] = '$' then pre_fresh_id (String.sub id1 1 ((String.length id1) - 2)) (* $が増えていくことを防ぐ *)
+            else pre_fresh_id id1 in
+          let S.LetRecExp (id1', id2', e1', e2') = rename exp id1 new_id in
+          S.LetRecExp (id1', id2', preprocess e1' (id1' :: id2' :: id_list), preprocess e2' (id1' :: id_list))
         else 
-          S.LetRecExp (id1, id2, preprocess e1 id_list, preprocess e2 (id1 :: id_list))
+          S.LetRecExp (id1, id2, preprocess e1 (id1 :: id2 :: id_list), preprocess e2 (id1 :: id_list))
     | S.LoopExp (id, e1, e2) ->
         if List.mem id id_list then 
-          let S.LoopExp (id', e1', e2') = rename exp id in
-          S.LoopExp (id', preprocess e1' id_list, preprocess e2' (id' :: id_list))
-        else 
+          let new_id = 
+            if id.[0] = '$' then pre_fresh_id (String.sub id 1 ((String.length id) - 2)) (* $が増えていくことを防ぐ *)
+            else pre_fresh_id id in
+          S.LoopExp (new_id, preprocess e1 id_list, preprocess (rename e2 id new_id) (new_id :: id_list))
+        else
           S.LoopExp (id, preprocess e1 id_list, preprocess e2 (id :: id_list))
     | S.RecurExp e -> S.RecurExp (preprocess e id_list)
     | S.TupleExp (e1, e2) -> S.TupleExp (preprocess e1 id_list, preprocess e2 id_list)
