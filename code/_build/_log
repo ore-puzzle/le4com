@@ -90,13 +90,13 @@ ocamlfind ocamldep -modules live.ml > live.ml.depends # cached
 # Target: live.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:live.cmo, file:live.ml, implem, ocaml, quiet }
 ocamlfind ocamlc -c -o live.cmo live.ml # cached
 # Target: reachableCopy.ml.depends, tags: { extension:ml, file:reachableCopy.ml, ocaml, ocamldep, quiet }
-ocamlfind ocamldep -modules reachableCopy.ml > reachableCopy.ml.depends # cached
-# Target: reachableCopy.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:reachableCopy.cmo, file:reachableCopy.ml, implem, ocaml, quiet }
-ocamlfind ocamlc -c -o reachableCopy.cmo reachableCopy.ml # cached
+ocamlfind ocamldep -modules reachableCopy.ml > reachableCopy.ml.depends
 # Target: reachableDef.ml.depends, tags: { extension:ml, file:reachableDef.ml, ocaml, ocamldep, quiet }
-ocamlfind ocamldep -modules reachableDef.ml > reachableDef.ml.depends
+ocamlfind ocamldep -modules reachableDef.ml > reachableDef.ml.depends # cached
 # Target: reachableDef.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:reachableDef.cmo, file:reachableDef.ml, implem, ocaml, quiet }
-ocamlfind ocamlc -c -o reachableDef.cmo reachableDef.ml
+ocamlfind ocamlc -c -o reachableDef.cmo reachableDef.ml # cached
+# Target: reachableCopy.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:reachableCopy.cmo, file:reachableCopy.ml, implem, ocaml, quiet }
+ocamlfind ocamlc -c -o reachableCopy.cmo reachableCopy.ml
 # Target: opt.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:opt.cmo, file:opt.ml, implem, ocaml, quiet }
 ocamlfind ocamlc -c -o opt.cmo opt.ml
 # Target: main.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:main.cmo, file:main.ml, implem, ocaml, quiet }
@@ -151,10 +151,10 @@ ocamlfind ocamlopt -c -o myMap.cmx myMap.ml # cached
 ocamlfind ocamlopt -c -o dfa.cmx dfa.ml # cached
 # Target: live.cmx, tags: { compile, extension:cmx, extension:ml, file:live.cmx, file:live.ml, implem, native, ocaml, quiet }
 ocamlfind ocamlopt -c -o live.cmx live.ml # cached
-# Target: reachableCopy.cmx, tags: { compile, extension:cmx, extension:ml, file:reachableCopy.cmx, file:reachableCopy.ml, implem, native, ocaml, quiet }
-ocamlfind ocamlopt -c -o reachableCopy.cmx reachableCopy.ml # cached
 # Target: reachableDef.cmx, tags: { compile, extension:cmx, extension:ml, file:reachableDef.cmx, file:reachableDef.ml, implem, native, ocaml, quiet }
-ocamlfind ocamlopt -c -o reachableDef.cmx reachableDef.ml
+ocamlfind ocamlopt -c -o reachableDef.cmx reachableDef.ml # cached
+# Target: reachableCopy.cmx, tags: { compile, extension:cmx, extension:ml, file:reachableCopy.cmx, file:reachableCopy.ml, implem, native, ocaml, quiet }
+ocamlfind ocamlopt -c -o reachableCopy.cmx reachableCopy.ml
 # Target: opt.cmx, tags: { compile, extension:cmx, extension:ml, file:opt.cmx, file:opt.ml, implem, native, ocaml, quiet }
 ocamlfind ocamlopt -c -o opt.cmx opt.ml
 # Target: main.cmx, tags: { compile, extension:cmx, extension:ml, file:main.cmx, file:main.ml, implem, native, ocaml, quiet }
