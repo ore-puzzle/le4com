@@ -62,7 +62,7 @@ ocamlfind ocamlc -c -o mySet.cmi mySet.mli # cached
 # Target: cfg.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:cfg.cmo, file:cfg.ml, implem, ocaml, quiet }
 ocamlfind ocamlc -c -o cfg.cmo cfg.ml # cached
 # Target: lexer.mll, tags: { extension:mll, file:lexer.mll, lexer, ocaml, ocamllex, quiet }
-/usr/bin/ocamllex -q lexer.mll # cached
+/home/ozaki/.opam/4.05.0/bin/ocamllex.opt -q lexer.mll # cached
 # Target: lexer.ml.depends, tags: { extension:ml, file:lexer.ml, ocaml, ocamldep, quiet }
 ocamlfind ocamldep -modules lexer.ml > lexer.ml.depends # cached
 # Target: parser.mly.depends, tags: { extension:mly, file:parser.mly, infer, menhir_ocamldep, ocaml, ocamldep, quiet }
@@ -94,13 +94,13 @@ ocamlfind ocamldep -modules reachableCopy.ml > reachableCopy.ml.depends # cached
 # Target: reachableCopy.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:reachableCopy.cmo, file:reachableCopy.ml, implem, ocaml, quiet }
 ocamlfind ocamlc -c -o reachableCopy.cmo reachableCopy.ml # cached
 # Target: reachableDef.ml.depends, tags: { extension:ml, file:reachableDef.ml, ocaml, ocamldep, quiet }
-ocamlfind ocamldep -modules reachableDef.ml > reachableDef.ml.depends
+ocamlfind ocamldep -modules reachableDef.ml > reachableDef.ml.depends # cached
 # Target: reachableDef.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:reachableDef.cmo, file:reachableDef.ml, implem, ocaml, quiet }
-ocamlfind ocamlc -c -o reachableDef.cmo reachableDef.ml
+ocamlfind ocamlc -c -o reachableDef.cmo reachableDef.ml # cached
 # Target: opt.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:opt.cmo, file:opt.ml, implem, ocaml, quiet }
-ocamlfind ocamlc -c -o opt.cmo opt.ml
+ocamlfind ocamlc -c -o opt.cmo opt.ml # cached
 # Target: main.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:main.cmo, file:main.ml, implem, ocaml, quiet }
-ocamlfind ocamlc -c -o main.cmo main.ml
+ocamlfind ocamlc -c -o main.cmo main.ml # cached
 # Target: arm_spec.cmx, tags: { compile, extension:cmx, extension:ml, file:arm_spec.cmx, file:arm_spec.ml, implem, native, ocaml, quiet }
 ocamlfind ocamlopt -c -o arm_spec.cmx arm_spec.ml # cached
 # Target: syntax.cmx, tags: { compile, extension:cmx, extension:ml, file:syntax.cmx, file:syntax.ml, implem, native, ocaml, quiet }
@@ -154,11 +154,11 @@ ocamlfind ocamlopt -c -o live.cmx live.ml # cached
 # Target: reachableCopy.cmx, tags: { compile, extension:cmx, extension:ml, file:reachableCopy.cmx, file:reachableCopy.ml, implem, native, ocaml, quiet }
 ocamlfind ocamlopt -c -o reachableCopy.cmx reachableCopy.ml # cached
 # Target: reachableDef.cmx, tags: { compile, extension:cmx, extension:ml, file:reachableDef.cmx, file:reachableDef.ml, implem, native, ocaml, quiet }
-ocamlfind ocamlopt -c -o reachableDef.cmx reachableDef.ml
+ocamlfind ocamlopt -c -o reachableDef.cmx reachableDef.ml # cached
 # Target: opt.cmx, tags: { compile, extension:cmx, extension:ml, file:opt.cmx, file:opt.ml, implem, native, ocaml, quiet }
-ocamlfind ocamlopt -c -o opt.cmx opt.ml
+ocamlfind ocamlopt -c -o opt.cmx opt.ml # cached
 # Target: main.cmx, tags: { compile, extension:cmx, extension:ml, file:main.cmx, file:main.ml, implem, native, ocaml, quiet }
-ocamlfind ocamlopt -c -o main.cmx main.ml
+ocamlfind ocamlopt -c -o main.cmx main.ml # cached
 # Target: main.native, tags: { dont_link_with, extension:native, file:main.native, link, native, ocaml, program, quiet }
-ocamlfind ocamlopt -linkpkg arm_spec.cmx misc.cmx pretty.cmx syntax.cmx normal.cmx closure.cmx environment.cmx flat.cmx vm.cmx arm_noreg.cmx reg.cmx arm_reg.cmx arm_simulator.cmx mySet.cmx cfg.cmx myMap.cmx dfa.cmx parser.cmx lexer.cmx live.cmx reachableCopy.cmx reachableDef.cmx opt.cmx main.cmx -o main.native
+ocamlfind ocamlopt -linkpkg arm_spec.cmx misc.cmx pretty.cmx syntax.cmx normal.cmx closure.cmx environment.cmx flat.cmx vm.cmx arm_noreg.cmx reg.cmx arm_reg.cmx arm_simulator.cmx mySet.cmx cfg.cmx myMap.cmx dfa.cmx parser.cmx lexer.cmx live.cmx reachableCopy.cmx reachableDef.cmx opt.cmx main.cmx -o main.native # cached
 # Compilation successful.

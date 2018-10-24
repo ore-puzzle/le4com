@@ -7,3 +7,4 @@
 ._ncdi
 .DS_Store
 code/_build/*
+*.pdf
