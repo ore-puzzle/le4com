@@ -3,7 +3,6 @@ open Cfg
 open Dfa
 module Set = MySet
 
-(* ==== vars: 変数名の集合 ==== *)
 
 let dummy = (-1, "-1")
 
@@ -19,13 +18,13 @@ let compare left right =
 
 let lub = Set.union
 
-let string_of_defs (ofs, num) =
+let string_of_def (ofs, num) =
   "(" ^ (Vm.string_of_operand (Local ofs)) ^ ", " ^ num ^ ")"
 
-let string_of_vars vs =
+let string_of_defs vs =
   String.concat ", "
     (List.sort String.compare
-       (List.map string_of_defs
+       (List.map string_of_def
           (List.filter (fun v -> v <> dummy) (Set.to_list vs))))
 
 let rec get_second_list l =
@@ -43,10 +42,10 @@ let rec remove dst = function
       else head :: (remove dst rest)
 
 let line_number stmt =
-  let (b_index, s_index) = Cfg.find_stmt !cfg stmt in
+  let (b_index, s_index) = find_stmt !cfg stmt in
   (string_of_int b_index) ^ (string_of_int s_index)
 
-let transfer entry_vars stmt =
+let transfer entry_defs stmt =
   let gen vs =
     lub
       (match stmt with
@@ -66,7 +65,7 @@ let transfer entry_vars stmt =
     | Malloc (dst, _)
     | Read (dst, _, _) -> Set.from_list (remove dst (Set.to_list vs))
     | _ -> vs in
-  gen (kill entry_vars)
+  gen (kill entry_defs)
 
 let make () = {
   direction = FORWARD;
@@ -75,5 +74,5 @@ let make () = {
   lub = lub;
   bottom = bottom;
   init = Set.singleton dummy; (* 不動点反復を回すためのdirty hack *)
-  to_str = string_of_vars
+  to_str = string_of_defs
 }
