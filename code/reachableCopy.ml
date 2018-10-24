@@ -18,7 +18,7 @@ let compare left right =
   else
     (if Set.is_empty (Set.diff right left) then GT else NO)
 
-let lub = 
+let lub = Set.union
 
 let string_of_eq (ofs, op) =
   (Vm.string_of_operand (Local ofs)) ^ " = " ^ (Vm.string_of_operand op) 
@@ -34,13 +34,11 @@ let rec get_second_list l =
     [] -> []
   | (_, head) :: rest -> head :: get_second_list rest
 
-let set_cfg cfg' = cfg := Array.concat (get_second_list cfg')
-
 let rec set_preds_exits =
   let stmts = Array.to_list (all_stmts !cfg) in
   let rec body_loop = function
       [] -> MyMap.empty
-    | head :: rest -> MyMap.assoc head (Set.empty : (Vm.id * Vm.operand) Set.t) (body_loop rest)
+    | head :: rest -> MyMap.assoc head (Set.empty : (id * operand) Set.t) (body_loop rest)
   in
     preds_exits := (body_loop stmts)
   
@@ -69,7 +67,8 @@ let transfer entry_eqs stmt =
   result
 
 
-let make () = {
+let make cfg' = cfg := Array.concat (get_second_list cfg');
+{
   direction = FORWARD;
   transfer = transfer;
   compare = compare;

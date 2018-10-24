@@ -30,10 +30,7 @@ let string_of_defs vs =
 let rec get_second_list l =
   match l with
     [] -> []
-  | (_, head) :: rest -> head :: get_second_list rest
-
-let set_cfg cfg' = cfg := Array.concat (get_second_list cfg')
-    
+  | (_, head) :: rest -> head :: get_second_list rest    
 
 let rec remove dst = function
     [] -> []
@@ -67,7 +64,8 @@ let transfer entry_defs stmt =
     | _ -> vs in
   gen (kill entry_defs)
 
-let make () = {
+let make cfg' = cfg := Array.concat (get_second_list cfg');
+{
   direction = FORWARD;
   transfer = transfer;
   compare = compare;

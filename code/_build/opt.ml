@@ -38,7 +38,7 @@ let optimize is_disp_cfg nreg vmcode =
     Cfg.display_cfg cfgs (Some string_of_prop));
 
   (* 到達コピー解析器を生成 *)
-  let rc = ReachableCopy.make () in
+  let rc = ReachableCopy.make cfgs in
   (* 到達コピー解析を実行 *)
   let rc_results = analyze_cfg rc cfgs in
   (* 解析結果を表示 *)
@@ -48,9 +48,8 @@ let optimize is_disp_cfg nreg vmcode =
     Cfg.display_cfg cfgs (Some string_of_prop));
 
   (* 到達可能定義解析器を生成 *)
-  let rd = ReachableDef.make () in
+  let rd = ReachableDef.make cfgs in
   (* 到達可能定義解析を実行 *)
-  ReachableDef.set_cfg cfgs;
   let rd_results = analyze_cfg rd cfgs in
   (* 解析結果を表示 *)
   if is_disp_cfg then (
