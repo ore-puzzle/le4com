@@ -37,7 +37,7 @@ let optimize is_disp_cfg nreg vmcode =
       lv.Dfa.to_str (Dfa.get_property lv_results stmt side) in
     Cfg.display_cfg cfgs (Some string_of_prop));
 
-  (* 到達コピー解析器を生成 *)
+(*  (* 到達コピー解析器を生成 *)
   let rc = ReachableCopy.make cfgs in
   (* 到達コピー解析を実行 *)
   let rc_results = analyze_cfg rc cfgs in
@@ -55,7 +55,7 @@ let optimize is_disp_cfg nreg vmcode =
   if is_disp_cfg then (
     let string_of_prop stmt side =
       rd.Dfa.to_str (Dfa.get_property rd_results stmt side) in
-    Cfg.display_cfg cfgs (Some string_of_prop));
+    Cfg.display_cfg cfgs (Some string_of_prop));*)
 
   (* その他，各種最適化 *)
   let vmcode' = opt lv_results vmcode in

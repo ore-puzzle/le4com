@@ -99,10 +99,127 @@ let string_of_decl (ProcDecl (lbl, n, instrs)) =
 let string_of_reg prog =
   String.concat "\n" (List.map string_of_decl prog)
 
+(* ==== constant ==== *)
+let dummy = -1 
+
+(* ==== support function ==== *)
+
+let rec get_properties_as_list lives = function
+    [] -> []
+  | stmt :: rest -> (MySet.to_list (Dfa.get_property lives stmt Cfg.BEFORE)) ::
+                    (MySet.to_list (Dfa.get_property lives stmt Cfg.AFTER)) ::
+                    get_properties_as_list lives rest
+
+let trans_props_from_op_to_ofs props =
+  let rec outer_loop props =
+    match props with
+      [] -> []
+    | head :: rest -> (inner_loop head) :: outer_loop rest
+  and inner_loop prop =
+    match prop with
+      [] -> []
+    | head :: rest ->
+       (match head with
+          Vm.Local ofs when ofs <> -1-> ofs :: inner_loop rest
+        | _ -> inner_loop rest)
+  in
+    outer_loop props
+
+
+
+let make_adjacency_matrix ofses size =
+  let matrix = Array.make_matrix size size 0 in
+  let rec outer_loop = function
+      [] -> ()
+    | head :: rest -> inner_loop head; outer_loop rest
+  and inner_loop = function
+      [] -> ()
+    | head :: rest -> 
+        for i = 0 to (List.length rest) - 1 do
+          matrix.(head).(List.nth rest i) <- 1;
+          matrix.(List.nth rest i).(head) <- 1
+        done;
+        inner_loop rest
+  in
+    outer_loop ofses;
+    matrix
+
+
+let rec make_node_color_list node_num =
+  match node_num with
+    0 -> []
+  | n -> (n-1, dummy) :: make_node_color_list (n-1) 
+
+
+let rec get_color node = function
+    [] -> err "no such node"
+  | (node', color) :: rest ->
+      if node = node' then color
+      else get_color node rest
+
+let rec get_min min = function
+    [] -> min
+  | head :: rest -> 
+      if head < min then get_min head rest
+      else get_min min rest              
+
+
+let rec replace (node, color) = function
+    [] -> err "no such node"
+  | (node', color') :: rest ->
+      if node = node' then (node, color) :: rest
+      else (node', color') :: replace (node, color) rest
+
+let string_of_id id = string_of_int id
+
+let rec string_of_ofs = function
+    [] -> ""
+  | head :: rest -> (string_of_id head) ^ ";" ^ (string_of_ofs rest)
+
+let rec string_of_ofses = function
+    [] -> ""
+  | head :: rest -> (string_of_ofs head) ^ " ; " ^ (string_of_ofses rest)
+
+
 (* ==== レジスタ割付け ==== *)
 
+let rec paint node_color adjacency_matrix now_node_color =
+  let rec get_adjacent_colors neighbor = function
+      [] -> []
+    | 0 :: rest -> get_adjacent_colors (neighbor+1) rest
+    | 1 :: rest -> (get_color neighbor node_color) :: get_adjacent_colors (neighbor+1) rest
+  in
+    match now_node_color with
+      [] -> []
+    | (node, _) :: rest ->
+        let row = Array.get adjacency_matrix node in
+        let adjacency_colors = get_adjacent_colors 0 (Array.to_list row) in
+        let new_color = (get_min dummy adjacency_colors) + 1 in
+        (node, new_color) :: paint (replace (node, new_color) node_color) adjacency_matrix rest
+
+let make_map nreg painted_node_color =
+  let rec body_loop nreg local_num = function
+      [] -> ([], local_num)
+    | (node, color) :: rest ->
+        if color < nreg then
+          let (tail, result_local_num) = body_loop nreg local_num rest in
+          ((node, R color) :: tail, result_local_num)
+        else 
+          let (tail, result_local_num) = body_loop nreg (local_num+1) rest in
+          ((node, L (color - nreg + 2)) :: tail, result_local_num)
+  in
+    body_loop nreg 0 painted_node_color
+
+(*let trans_inst map = function
+    Vm.Move (id, op) ->*)
+
 let trans_decl nreg lives (Vm.ProcDecl (lbl, nlocal, instrs)) =
-  let insts' = [Return (IntV 1)] in
+  let props = get_properties_as_list lives instrs in
+  let ofses = trans_props_from_op_to_ofs props in
+  let node_color = make_node_color_list nlocal in
+  let adjacency_matrix = make_adjacency_matrix ofses nlocal in
+  let (map, local_num) = make_map nreg (paint node_color adjacency_matrix node_color) in
+  let insts' = [Load (0, 1)] in
   ProcDecl (lbl, 0, insts')
 
 (* entry point *)
