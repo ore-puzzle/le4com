@@ -102,6 +102,20 @@ let string_of_reg prog =
 (* ==== constant ==== *)
 let dummy = -1 
 
+let tmp = 2
+
+(* ==== for debug ==== *)
+
+let string_of_id id = string_of_int id
+
+let rec string_of_ofs = function
+    [] -> ""
+  | head :: rest -> (string_of_id head) ^ ";" ^ (string_of_ofs rest)
+
+let rec string_of_ofses = function
+    [] -> ""
+  | head :: rest -> (string_of_ofs head) ^ " ; " ^ (string_of_ofses rest)
+
 (* ==== support function ==== *)
 
 let rec get_properties_as_list lives = function
@@ -170,16 +184,47 @@ let rec replace (node, color) = function
       if node = node' then (node, color) :: rest
       else (node', color') :: replace (node, color) rest
 
-let string_of_id id = string_of_int id
+let rop_of_vop map = function
+    Vm.Param i -> Param i
+  | Vm.Local id -> 
+     (match List.assoc id map with
+        R reg -> Reg reg
+      | L ofs -> Reg dummy)
+  | Vm.Proc l -> Proc l
+  | Vm.IntV i -> IntV i
 
-let rec string_of_ofs = function
-    [] -> ""
-  | head :: rest -> (string_of_id head) ^ ";" ^ (string_of_ofs rest)
 
-let rec string_of_ofses = function
-    [] -> ""
-  | head :: rest -> (string_of_ofs head) ^ " ; " ^ (string_of_ofses rest)
+let rec add_flag_0 = function
+    [] -> []
+  | head :: rest -> (head, 0) :: add_flag_0 rest
 
+
+let rec mark label = function
+    [] -> []  (* ここには来ないはず *)
+  | (inst, flag) :: rest ->
+     (match inst with
+        Vm.Label label' when label = label' -> (inst, 1) :: rest
+      | _ -> (inst, flag) :: mark label rest)
+
+
+let preprocess map insts =
+  let rec body_loop = function
+      [] -> []
+    | (inst, flag) as head :: rest ->
+       (match inst with
+          Vm.BranchIf (Local id, label) ->
+           (match List.assoc id map with
+              L ofs -> head :: body_loop (mark label rest)
+            | _ -> head :: body_loop rest)
+        | _ -> head :: body_loop rest)
+  in
+    let flaged_insts = add_flag_0 insts in
+    body_loop flaged_insts
+
+
+(*let rec get_max_tmp = function
+    [] -> 0
+  | (Vm.Call*)
 
 (* ==== レジスタ割付け ==== *)
 
@@ -199,7 +244,9 @@ let rec paint node_color adjacency_matrix now_node_color =
 
 let make_map nreg painted_node_color =
   let rec body_loop nreg local_num = function
-      [] -> ([], local_num)
+      [] -> 
+        if local_num = 0 then ([], local_num)
+        else ([], local_num + 1)
     | (node, color) :: rest ->
         if color < nreg then
           let (tail, result_local_num) = body_loop nreg local_num rest in
@@ -211,7 +258,21 @@ let make_map nreg painted_node_color =
     body_loop nreg 0 painted_node_color
 
 (*let trans_inst map = function
-    Vm.Move (id, op) ->*)
+    (Vm.Move (id, op), _) -> 
+      
+  | (Vm.BinOp (id, binOp, op1, op2), _) ->
+  | (Vm.Label label, flag) ->
+      if flag = 0 then
+        [Label label]
+      else
+        [Label label;
+         Load (0, tmp)]
+  | (Vm.BranchIf (op, label), _) ->
+  | (Vm.Goto label, _) -> Goto label
+  | (Vm.Call (id, op, ops), _) ->
+  | (Vm.Return op, _) ->
+  | (Vm.Malloc (id, ops), _) ->
+  | (Vm.Read (id, op, i), _) ->*)
 
 let trans_decl nreg lives (Vm.ProcDecl (lbl, nlocal, instrs)) =
   let props = get_properties_as_list lives instrs in
@@ -219,7 +280,7 @@ let trans_decl nreg lives (Vm.ProcDecl (lbl, nlocal, instrs)) =
   let node_color = make_node_color_list nlocal in
   let adjacency_matrix = make_adjacency_matrix ofses nlocal in
   let (map, local_num) = make_map nreg (paint node_color adjacency_matrix node_color) in
-  let insts' = [Load (0, 1)] in
+  let insts' = [Load (reserved_reg, 1)] in
   ProcDecl (lbl, 0, insts')
 
 (* entry point *)
