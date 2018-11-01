@@ -1,0 +1,28 @@
+\documentclass{jarticle}
+\usepackage[dvipdfmx]{graphicx}
+\usepackage{here}
+\usepackage{listings}
+
+\begin{document}
+
+\title{中間レポート2}
+\author{1029289895 尾崎翔太}
+\date{2018/11/01}
+
+\maketitle
+\newpage
+
+\section{課題6}
+\subsection{プログラムの設計方針}
+まず, 木の型がvalueとcexpとexpに分かれてしまったのでそれぞれ変換する関数を用意する. 関数の引数にクロージャを追加したりinの後でクロージャを束縛したりすることは, 単にそこを書き換えたり追加したりするだけなので簡単である. 問題は自由変数を含んでいた時の本体式の書き換えである. まず, 自由変数を求めるために式中の変数を集めて, その中から束縛されているものを取り除く必要がある. そうした後で, 自由変数の値をクロージャから取り出して, 本体式の頭で束縛していく必要がある. この部分は正規化で行ったのと同じ埋め込みを行う. この時, 埋め込みに使う関数は合成を用いて作ることにした.
+\subsection{プログラムの説明}
+\subsubsection{cvalue_of_nvalue関数}
+closure.mlの113〜127行目に定義されているcvalue\_of\_nvalue関数とccexp\_of\_ncexp関数はほぼ単純にコンストラクタを付け替えていく関数である. IfExpはexpをぶら下げていて特殊なので, この関数では処理しない. また, AppExpについては, 関数ポインタをクロージャから取り出すという作業を追加している. 132〜166行目に定義されているgather\_id\_from\_XXX関数たちは, expを巡回して, 束縛されている変数を見つけるとそのidをdecl\_idsへ, 参照されている変数を見つけるとそのidをvar\_idsへ放り込んでいく関数である. 169〜173行目に定義されているdelete\_duplication関数は, リスト内の重複を取り除くための関数で, gather\_id\_from\_XXX関数で集めてきたidの重複を取り除くために使われている. 177〜181行目に定義されているremove関数はリストからある要素を一つ取り除く関数である. この関数は184〜188行目に定義されているdiff関数のためにある. diff関数は差集合を求める関数である. これにより, 参照されている変数から束縛された変数を引くことで自由変数が求まる. 191〜193行目に定義されているvar\_of\_id関数は
+\subsection{感想}
+
+\section{課題7}
+\subsection{プログラムの設計方針}
+\subsection{プログラムの説明}
+\subsection{感想}
+
+\end{document}
