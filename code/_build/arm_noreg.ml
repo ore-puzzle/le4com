@@ -40,6 +40,10 @@ let fresh_label =
 let make_instr_of_malloc a1 ops =
   let rec body_loop ofs = function
       [] -> []
+    | (Vm.Param i) :: rest when param_to_reg i = a1 ->
+        [Instr (Ldr (V1, mem_access Sp 0));
+         Instr (Str (V1, mem_access a1 ofs))] @
+        body_loop (ofs + 1) rest
     | op :: rest -> 
         (gen_operand V1 op) @ 
         [Instr (Str (V1, mem_access a1 ofs))] @
@@ -101,10 +105,10 @@ let gen_decl (Vm.ProcDecl (name, nlocal, instrs)) =
         let part_of_instr = make_instr_of_malloc A1 ops in
         [Instr (Str (A1, mem_access Sp 0));
          Instr (Mov (A1, (I (List.length ops))));
-         Instr (Bl "mymalloc")] @
+         Instr (Bl "mymalloc");
+         Instr (Str (A1, local_access id))] @
          part_of_instr @
-        [Instr (Str (A1, local_access id));
-         Instr (Ldr (A1, mem_access Sp 0))]       
+        [Instr (Ldr (A1, mem_access Sp 0))]       
     | Vm.Read (id, op, i) ->
         (gen_operand V1 op) @
         [Instr (Ldr (V1, mem_access V1 i));

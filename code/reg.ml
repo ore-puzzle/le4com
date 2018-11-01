@@ -266,7 +266,7 @@ let rop_of_vop = function
   | Vm.Proc l -> Proc l
   | Vm.IntV i -> IntV i
 
-let make_assign_case_dest_is_reg dest index op map available_regs (* available_regs is not needed *) =
+let make_assign dest index op map (* available_regs is not needed *) =
   match op with
     Vm.Local id ->
      (match List.assoc id map with
@@ -275,7 +275,7 @@ let make_assign_case_dest_is_reg dest index op map available_regs (* available_r
                   Assign (dest, index, Reg reserved_reg)])
   | _ -> [Assign (dest, index, rop_of_vop op)]
 
-let make_assign_case_dest_is_local dest index op map available_regs =
+(*let make_assign_case_dest_is_local dest index op map available_regs =
   match op with
     Vm.Local id ->
      (match List.assoc id map with
@@ -290,16 +290,23 @@ let make_assign_case_dest_is_local dest index op map available_regs =
              Load (0, ofs);
              Assign (dest, index, Reg 0);
              Load (0, tmp)])
-  | _ -> [Assign (dest, index, rop_of_vop op)]
+  | _ -> [Assign (dest, index, rop_of_vop op)]*)
 
-let make_assigns dest ops map available_regs =
+(*let make_assigns dest ops map available_regs =
   let rec body_loop make_assign index = function
       [] -> []
     | head :: rest -> (make_assign dest index head map available_regs) :: body_loop make_assign (index+1) rest
   in
     match dest with
       R reg -> body_loop make_assign_case_dest_is_reg 0 ops
-    | L ofs -> body_loop make_assign_case_dest_is_local 0 ops 
+    | L ofs -> body_loop make_assign_case_dest_is_local 0 ops *)
+
+let make_assigns dest ops map =
+  let rec body_loop index = function
+      [] -> []
+    | head :: rest -> (make_assign dest index head map) :: body_loop (index+1) rest
+  in
+    body_loop 0 ops
 
 let rec map_property prop map =
   match prop with
@@ -638,7 +645,7 @@ let trans_inst map inst local_num lives available_regs =
       | _ -> [Return (rop_of_vop op)])
   | Vm.Malloc (id, ops) -> 
       let dest = List.assoc id map in
-      (Malloc (dest, List.length ops)) :: List.concat (make_assigns dest ops map available_regs)
+      (Malloc (dest, List.length ops)) :: List.concat (make_assigns dest ops map)
   | Vm.Read (id, op, i) ->
       let dest = List.assoc id map in
       match op with

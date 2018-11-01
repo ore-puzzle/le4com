@@ -1,6 +1,5 @@
 let debug = ref false
 let dprint s = if !debug then (print_string (s ()) ; flush stdout)
-let simulation = ref false
 
 let display_cfg = ref false
 let optimize = ref false
@@ -32,6 +31,7 @@ let rec compile prompt ichan cont =
   (* Translate to VM (5章後半) *)
   let vmcode = Vm.trans flat in
   dprint (fun () -> "\n(* [VM code] *)\n" ^ (Vm.string_of_vm vmcode));
+  (*Vm_simulator.run vmcode;*)
 
   (* 制御フローグラフを表示 *)
   if !display_cfg && not !optimize then
@@ -56,14 +56,8 @@ let rec compile prompt ichan cont =
   let () = output_string ochan (Arm_spec.string_of armcode ^ "\n") in
   if !outfile <> "-" then close_out ochan;
 
-  if !simulation
-  then let state = Arm_simulator.simulate armcode in
-    (print_string ("\n(* [Simulation result] *)\n" ^
-                   (Arm_simulator.string_of_state state) ^ "\n");
-     flush stdout);
-
-    (* continued... *)
-    cont ()
+  (* continued... *)
+  cont ()
 
 
 (* ==== main ==== *)
@@ -81,8 +75,6 @@ let aspec = Arg.align [
      " Display CFG (default: " ^ (string_of_bool !display_cfg) ^ ")");
     ("-v", Arg.Unit (fun () -> debug := true),
      " Print debug info (default: " ^ (string_of_bool !debug) ^ ")");
-    ("-s", Arg.Unit (fun () -> simulation := true),
-     " Print simulation result (default: " ^ (string_of_bool !simulation) ^ ")");
   ]
 
 let main () =

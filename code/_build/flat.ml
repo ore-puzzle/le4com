@@ -113,8 +113,8 @@ let string_of_flat prog =
          pr_of_decl decl <|> nil <|> doc) prog nil))
 
 
-(* support function *)
-
+(* ==== support function ==== *)
+(* valueの変換 *)
 let rec fvalue_of_cvalue cvalue env =
     match cvalue with
       C.Var id -> 
@@ -124,20 +124,23 @@ let rec fvalue_of_cvalue cvalue env =
           Environment.Not_bound -> err ("Error: " ^ id ^ " id not bound"))
     | C.IntV i -> IntV i
 
+(* valueのリストの変換 *)
 let rec fvalue_list_of_cvalue_list cvalue_list env =
   match cvalue_list with
     [] -> []
   | head :: rest -> (fvalue_of_cvalue head env) :: fvalue_list_of_cvalue_list rest env 
 
+(* cexpの変換 *)
 let rec fcexp_of_ccexp ccexp env =
     match ccexp with
       C.ValExp v -> ValExp (fvalue_of_cvalue v env)
     | C.BinOp (binOp, v1, v2) -> BinOp (binOp, fvalue_of_cvalue v1 env, fvalue_of_cvalue v2 env)
     | C.AppExp (v, v_list) -> AppExp (fvalue_of_cvalue v env, fvalue_list_of_cvalue_list v_list env)
-    | C.IfExp _ -> err "For debug: This error must not be raised at flat"
+    | C.IfExp _ -> err "For debug: This error must not be raised at flat" (* 例によってIfExpは特別扱い *)
     | C.TupleExp v_list -> TupleExp (fvalue_list_of_cvalue_list v_list env)
     | C.ProjExp (v, i) -> ProjExp (fvalue_of_cvalue v env, i)
 
+(* 変数のリストを受け取って、その中身を順に環境に追加 *)
 let rec extend_env_by_id_list id_list env =
   match id_list with
     [] -> env
@@ -146,7 +149,7 @@ let rec extend_env_by_id_list id_list env =
       extend_env_by_id_list rest new_env   
 
 (* ==== フラット化：変数参照と関数参照の区別も同時に行う ==== *)
-
+(* 木を巡回していって関数をdecl_listに放り込んで残りはrest_expにする、ということをしていく *)
 let flatten exp =
   let rec body_loop exp env : (exp * decl list) =
     match exp with
@@ -168,9 +171,12 @@ let flatten exp =
          | _ -> (LetExp (id, fcexp_of_ccexp ce env, new_exp), new_decl_list))
     | C.LetRecExp (id, id_list, e1, e2) -> 
         let new_env1 = extend_env_by_id_list id_list env in
+        (*　こいつだけはFunに束縛する *)
         let new_env2 = Environment.extend id (Fun id) env in
+        (* 渡す環境に注意 *)
         let (new_exp1, new_decl_list1) = body_loop e1 new_env1 in
         let (new_exp2, new_decl_list2) = body_loop e2 new_env2 in
+        (* rest_expとしてはinの後ろのみを返す *)
         (new_exp2, (RecDecl (id, id_list, new_exp1)) :: (new_decl_list1 @ new_decl_list2))
     | C.LoopExp (id, ce, e) ->
         let new_env = Environment.extend id (Var id) env in
@@ -183,5 +189,6 @@ let flatten exp =
           | _ -> (LoopExp (id, fcexp_of_ccexp ce env, new_exp), new_decl_list))
     | C.RecurExp v -> (RecurExp (fvalue_of_cvalue v env), [])
   in
+    (* rest_expは関数を切り出していった残り、すなわちtop_level関数の本体式のことである *)
     let (rest_exp, decl_list) = body_loop exp Environment.empty in
     decl_list @ [(RecDecl ("_toplevel", ["p0"; "p1"], rest_exp))]
