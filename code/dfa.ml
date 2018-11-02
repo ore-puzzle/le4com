@@ -13,7 +13,7 @@ type 'a analysis = {
   direction : direction;
   transfer : 'a -> Vm.instr -> 'a;
   compare : 'a -> 'a -> prop_ordering;
-  lub : 'a -> 'a -> 'a;
+  lub : 'a -> 'a -> Vm.instr -> 'a;
   bottom : 'a;
   init : 'a;
   to_str : 'a -> string
@@ -54,7 +54,7 @@ let solve anlys cfg =
       let (stmt, prop) = Queue.take wl in
       let old_entry_prop = get_prop entries stmt in
       (* 追加されるプロパティとの least upper bound を計算 *)
-      let new_entry_prop = anlys.lub old_entry_prop prop in
+      let new_entry_prop = anlys.lub old_entry_prop prop stmt (* stmtを追加で引数にとるようにした *) in
       (* 差分の有無で場合分け *)
       match anlys.compare new_entry_prop old_entry_prop with
         EQ -> fixed_point wl entries exits

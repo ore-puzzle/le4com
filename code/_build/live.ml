@@ -15,7 +15,7 @@ let compare left right =
   else
     (if Set.is_empty (Set.diff right left) then GT else NO)
 
-let lub = Set.union
+let lub old_entry_prop prop stmt = Set.union old_entry_prop prop
 
 let string_of_vars vs =
   String.concat ", "
@@ -32,7 +32,7 @@ let filter_vars vs =
 
 let transfer entry_vars stmt =
   let gen vs =
-    lub
+    Set.union
       (filter_vars (match stmt with
              Move (dst, src) -> Set.singleton src
            | BinOp (dst, op, l, r) -> Set.from_list [l; r]

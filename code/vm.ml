@@ -202,8 +202,9 @@ let trans_decl (F.RecDecl (proc_name, params, body)) =
     let ids = gather_id_from_exp body in
     let delta = make_delta params ids proc_name in
     let instrs = trans_exp body delta 0 0 "dummy" in
+    let return i = [Return (Local i)] in
     ProcDecl (proc_name, (List.length ids) + 1, 
-              instrs @ [Return (Local 0)])
+              instrs @ (return 0))
 
 (* entry point *)
 let trans = List.map trans_decl

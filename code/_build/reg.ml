@@ -249,16 +249,7 @@ let preprocess map insts =
     body_loop flaged_insts*)
 
 
-let rec get_max_tmp instrs lives max =
-  match instrs with 
-    [] -> max
-  | (Vm.Call _) as stmt :: rest ->
-      let num = List.length (
-                  List.filter (fun op -> match op with Vm.Local _ -> true | _ -> false) 
-                              (MySet.to_list (Dfa.get_property lives stmt Cfg.BEFORE))) in
-      if max < num then get_max_tmp rest lives num
-      else get_max_tmp rest lives max
-  | _ :: rest -> get_max_tmp rest lives max
+
 
 let rop_of_vop = function
     Vm.Param i -> Param i
@@ -311,11 +302,26 @@ let make_assigns dest ops map =
 let rec map_property prop map =
   match prop with
     [] -> []
-  | Vm.Local id :: rest when id <> -1-> 
+  | Vm.Local id :: rest when id <> -1 -> 
      (match List.assoc id map with
         R reg -> reg :: map_property rest map
       | L ofs -> map_property rest map)
   | _ :: rest -> map_property rest map
+
+
+let rec get_max_tmp instrs lives map max =
+  match instrs with 
+    [] -> max
+  | (Vm.Call (id, _, _)) as stmt :: rest ->
+      let prop = Dfa.get_property lives stmt Cfg.AFTER in
+      let should_escaped_regs = map_property (MySet.to_list (MySet.diff prop (MySet.singleton (Vm.Local id)))) map in
+      let num = List.length should_escaped_regs in
+      if max < num then get_max_tmp rest lives map num
+      else get_max_tmp rest lives map max
+  | _ :: rest -> get_max_tmp rest lives map max
+
+
+      
 
 
 let rec make_escape_recover_instrs index = function
@@ -364,7 +370,7 @@ let make_map nreg painted_node_color =
   in
     body_loop nreg 0 painted_node_color
 
-let make_call_instr dest op op1 op2 available_regs using_regs map =
+let make_call_instr dest op op1 op2 available_regs escaped_regs map =
   match op, op1, op2 with
     Vm.Local id, Vm.Local id1, Vm.Local id2 ->
      (match List.assoc id map, List.assoc id1 map, List.assoc id2 map with
@@ -381,7 +387,7 @@ let make_call_instr dest op op1 op2 available_regs using_regs map =
             if List.length available_regs <> 0 then
               List.hd available_regs
             else
-              List.hd (MySet.to_list (MySet.remove reg (MySet.from_list using_regs))) in
+              List.hd (MySet.to_list (MySet.remove reg (MySet.from_list escaped_regs))) in
           [Load (reserved_reg, ofs1);
            Load (reg_for_op2, ofs2);
            Call (dest, Reg reg, [Reg reserved_reg; Reg reg_for_op2])]
@@ -393,7 +399,7 @@ let make_call_instr dest op op1 op2 available_regs using_regs map =
             if List.length available_regs <> 0 then
               List.hd available_regs
             else
-              List.hd using_regs in
+              List.hd escaped_regs in
           [Load (reserved_reg, ofs);
            Load (reg_for_op2, ofs2);
            Call (dest, Reg reserved_reg, [Reg reg1; Reg reg_for_op2])]
@@ -402,7 +408,7 @@ let make_call_instr dest op op1 op2 available_regs using_regs map =
             if List.length available_regs <> 0 then
               List.hd available_regs
             else
-              List.hd (MySet.to_list (MySet.remove reg2 (MySet.from_list using_regs))) in
+              List.hd (MySet.to_list (MySet.remove reg2 (MySet.from_list escaped_regs))) in
           [Load (reserved_reg, ofs);
            Load (reg_for_op1, ofs1);
            Call (dest, Reg reserved_reg, [Reg reg_for_op1; Reg reg2])]
@@ -411,14 +417,14 @@ let make_call_instr dest op op1 op2 available_regs using_regs map =
             if List.length available_regs <> 0 then
               List.hd available_regs
             else 
-              List.hd using_regs in
+              List.hd escaped_regs in
           let reg_for_op2 =
             if  List.length available_regs >= 2 then
               List.nth available_regs 1
             else if List.length available_regs = 1 then
-              List.hd using_regs 
+              List.hd escaped_regs 
             else
-              List.nth using_regs 1 in
+              List.nth escaped_regs 1 in
           [Load (reserved_reg, ofs);
            Load (reg_for_op1, ofs1);
            Load (reg_for_op2, ofs2);
@@ -438,7 +444,7 @@ let make_call_instr dest op op1 op2 available_regs using_regs map =
               if List.length available_regs <> 0 then
                 List.hd available_regs
               else
-                List.hd using_regs in
+                List.hd escaped_regs in
             [Load (reserved_reg, ofs);
              Load (reg_for_op1, ofs1);
              Call (dest, Reg reserved_reg, [Reg reg_for_op1; rop_of_vop op2])])
@@ -457,7 +463,7 @@ let make_call_instr dest op op1 op2 available_regs using_regs map =
               if List.length available_regs <> 0 then
                 List.hd available_regs
               else
-                List.hd using_regs in
+                List.hd escaped_regs in
             [Load (reserved_reg, ofs);
              Load (reg_for_op2, ofs2);
              Call (dest, Reg reserved_reg, [rop_of_vop op1; Reg reg_for_op2])])
@@ -483,7 +489,7 @@ let make_call_instr dest op op1 op2 available_regs using_regs map =
               if List.length available_regs <> 0 then
                 List.hd available_regs
               else 
-                List.hd using_regs in
+                List.hd escaped_regs in
             [Load (reserved_reg, ofs1);
              Load (reg_for_op2, ofs2);
              Call (dest, rop_of_vop op, [Reg reserved_reg; Reg reg_for_op2])])
@@ -629,11 +635,11 @@ let trans_inst map inst local_num lives available_regs =
   | Vm.Goto label -> [Goto label]
   | Vm.Call (id, op, ops) ->
       let prop = Dfa.get_property lives inst Cfg.AFTER in
-      let using_regs = map_property (MySet.to_list (MySet.diff prop (MySet.singleton (Vm.Local id)))) map in
-      let (stores, loads) = make_escape_recover_instrs (local_num + 2) using_regs in 
+      let should_escaped_regs = map_property (MySet.to_list (MySet.diff prop (MySet.singleton (Vm.Local id)))) map in
+      let (stores, loads) = make_escape_recover_instrs (local_num + 2) should_escaped_regs in 
       let dest = List.assoc id map in
       let (op1, op2) = match ops with arg1 :: [arg2] -> (arg1, arg2) in
-      let call_instrs = make_call_instr dest op op1 op2 available_regs using_regs map in
+      let call_instrs = make_call_instr dest op op1 op2 available_regs should_escaped_regs map in
       stores @ call_instrs @ loads     
   | Vm.Return op ->
      (match op with
@@ -677,7 +683,7 @@ let trans_decl nreg lives (Vm.ProcDecl (lbl, nlocal, instrs)) =
   let node_color = List.rev (make_node_color_list nlocal) in
   let adjacency_matrix = make_adjacency_matrix ofses nlocal in
   let (map, local_num) = make_map nreg (paint node_color adjacency_matrix node_color) in
-  let new_nlocal = local_num + get_max_tmp instrs lives 0 in
+  let new_nlocal = local_num + get_max_tmp instrs lives map 0 in
   let regs = MySet.from_list (make_regs nreg) in
   let insts' = trans_instrs nreg lives map local_num regs instrs in
   ProcDecl (lbl, new_nlocal, List.concat insts')

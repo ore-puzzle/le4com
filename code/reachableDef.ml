@@ -16,10 +16,10 @@ let compare left right =
   else
     (if Set.is_empty (Set.diff right left) then GT else NO)
 
-let lub = Set.union
+let lub old_entry_prop prop stmt = Set.union old_entry_prop prop
 
-let string_of_def (ofs, num) =
-  "(" ^ (Vm.string_of_operand (Local ofs)) ^ ", " ^ num ^ ")"
+let string_of_def (ofs, (b_index, s_index)) =
+  "(" ^ (Vm.string_of_operand (Local ofs)) ^ ", " ^ (string_of_int b_index) ^ (stirng_of_int s_index) ^ ")"
 
 let string_of_defs vs =
   String.concat ", "
@@ -38,31 +38,23 @@ let rec remove dst = function
       if dst = dst' then rest
       else head :: (remove dst rest)
 
-let line_number stmt =
+let location stmt =
   let (b_index, s_index) = find_stmt !cfg stmt in
-  (string_of_int b_index) ^ (string_of_int s_index)
+  (string_of_int b_index, string_of_int s_index)
 
 let transfer entry_defs stmt =
   let gen vs =
-    lub
+    Set.union
       (match stmt with
              Move (dst, _)
            | BinOp (dst, _, _, _)
            | Call (dst, _, _)
            | Malloc (dst, _)
-           | Read (dst, _, _) -> Set.singleton (dst, line_number stmt)
+           | Read (dst, _, _) -> Set.singleton (dst, location stmt)
            | _ -> Set.empty
          )
       vs in
-  let kill vs =
-    match stmt with
-      Move (dst, _)
-    | BinOp (dst, _, _, _)
-    | Call (dst, _, _)
-    | Malloc (dst, _)
-    | Read (dst, _, _) -> Set.from_list (remove dst (Set.to_list vs))
-    | _ -> vs in
-  gen (kill entry_defs)
+  gen entry_defs
 
 let make cfg' = cfg := Array.concat (get_second_list cfg');
 {
