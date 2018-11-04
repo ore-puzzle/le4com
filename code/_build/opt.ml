@@ -4,6 +4,8 @@ module Map = MyMap
 exception Error of string
 let err s = raise (Error s)
 
+let dprint s = (print_string (s ()) ; flush stdout)
+
 (* 複数の CFG を解析し，結果を1つの結果にマージ
    結果は Vm.instr をキーとするマップ(の組)であり，各キーは
    (equalityではなく) identityにより比較されることに注意 *)
@@ -20,7 +22,9 @@ let analyze_cfg anlys cfgs =
 (* 各種最適化をここに追加 *)
 let opt lv_results vmcode = vmcode
 
-let opt_copy rc_results = PropagateCopy.propagate_copies rc_results
+let opt_copy rc_results = CopyPropagation.propagate_copies rc_results
+
+let opt_fold rd_results cfgs = ConstantFolding.fold_const rd_results cfgs
 
 (* レジスタ機械コードの生成．nregは利用可能な汎用物理レジスタの個数 *)
 let gen_regcode nreg lv_results vmcode =
@@ -41,9 +45,23 @@ let optimize is_disp_cfg nreg vmcode =
     Cfg.display_cfg cfgs (Some string_of_prop));
 
   let vmcode' = opt_copy rc_results vmcode in
-  let dprint s = (print_string (s ()) ; flush stdout) in
   dprint (fun () -> "\n(* [Copy code] *)\n" ^ (Vm.string_of_vm vmcode'));
 
+  (* CFGを構築 *)
+  let cfgs' = Cfg.build vmcode' in 
+  
+  (* 到達可能定義解析器を生成 *)
+  let rd = ReachableDef.make cfgs' in 
+  (* 到達可能定義解析を実行 *)
+  let rd_results = analyze_cfg rd cfgs' in
+  (* 解析結果を表示 *)
+  if is_disp_cfg then (
+    let string_of_prop stmt side =
+      rd.Dfa.to_str (Dfa.get_property rd_results stmt side) in
+    Cfg.display_cfg cfgs' (Some string_of_prop));
+  
+  let vmcode'' = opt_fold rd_results cfgs' vmcode' in
+  dprint (fun () -> "\n(* [Fold code] *)\n" ^ (Vm.string_of_vm vmcode''));
 
   (* 生存変数解析器を生成 *)
   let lv = Live.make () in
@@ -57,15 +75,7 @@ let optimize is_disp_cfg nreg vmcode =
 
    
 
-(*  (* 到達可能定義解析器を生成 *)
-  let rd = ReachableDef.make cfgs in
-  (* 到達可能定義解析を実行 *)
-  let rd_results = analyze_cfg rd cfgs in
-  (* 解析結果を表示 *)
-  if is_disp_cfg then (
-    let string_of_prop stmt side =
-      rd.Dfa.to_str (Dfa.get_property rd_results stmt side) in
-    Cfg.display_cfg cfgs (Some string_of_prop));*)
+  
 
   (* その他，各種最適化 *)
   let vmcode' = opt lv_results vmcode in

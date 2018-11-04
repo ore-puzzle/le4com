@@ -17,9 +17,9 @@ let rec ops_to_ops' prop = function
       op' :: ops_to_ops' prop rest
 
 let propagate_copy copies instr =
-  let prop = MySet.to_list (Dfa.get_property copies instr Cfg.BEFORE) in
   match instr with
     Move (id, op) ->
+      let prop = MySet.to_list (Dfa.get_property copies instr Cfg.BEFORE) in
       let subset = get_subset op prop in
       let op' = 
         match subset with
@@ -27,6 +27,7 @@ let propagate_copy copies instr =
         | _ -> op in
       Move (id, op')
   | BinOp (id, binOp, op1, op2) ->
+      let prop = MySet.to_list (Dfa.get_property copies instr Cfg.BEFORE) in
       let subset1 = get_subset op1 prop in
       let subset2 = get_subset op2 prop in
       let (op1', op2') =
@@ -38,6 +39,7 @@ let propagate_copy copies instr =
       BinOp (id, binOp, op1', op2')
   | Label l -> Label l
   | BranchIf (op, l) ->
+      let prop = MySet.to_list (Dfa.get_property copies instr Cfg.BEFORE) in
       let subset = get_subset op prop in
       let op' = 
         match subset with
@@ -46,6 +48,7 @@ let propagate_copy copies instr =
       BranchIf (op', l)
   | Goto l -> Goto l
   | Call (id, op_f, ops) ->
+      let prop = MySet.to_list (Dfa.get_property copies instr Cfg.BEFORE) in
       let subset = get_subset op_f prop in
       let op_f' = 
         match subset with
@@ -54,6 +57,7 @@ let propagate_copy copies instr =
       let ops' = ops_to_ops' prop ops in
       Call (id, op_f', ops')
   | Return op ->
+      let prop = MySet.to_list (Dfa.get_property copies instr Cfg.BEFORE) in
       let subset = get_subset op prop in
       let op' = 
         match subset with
@@ -61,9 +65,11 @@ let propagate_copy copies instr =
         | _ -> op in
       Return op'
   | Malloc (id, ops) ->
+      let prop = MySet.to_list (Dfa.get_property copies instr Cfg.BEFORE) in
       let ops' = ops_to_ops' prop ops in
       Malloc (id, ops')
   | Read (id, op, i) ->
+      let prop = MySet.to_list (Dfa.get_property copies instr Cfg.BEFORE) in
       let subset = get_subset op prop in
       let op' = 
         match subset with

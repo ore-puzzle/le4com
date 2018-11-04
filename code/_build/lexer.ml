@@ -17,19 +17,19 @@ let reservedWords = [
 
 # 19 "lexer.ml"
 let __ocaml_lex_tables = {
-  Lexing.lex_base = 
+  Lexing.lex_base =
    "\000\000\242\255\028\000\244\255\245\255\247\255\248\255\249\255\
     \250\255\003\000\252\255\253\255\038\000\103\000\004\000\246\255\
     \251\255";
-  Lexing.lex_backtrk = 
+  Lexing.lex_backtrk =
    "\255\255\255\255\012\000\255\255\255\255\255\255\255\255\255\255\
     \255\255\255\255\255\255\255\255\001\000\255\255\000\000\255\255\
     \255\255";
-  Lexing.lex_default = 
+  Lexing.lex_default =
    "\255\255\000\000\255\255\000\000\000\000\000\000\000\000\000\000\
     \000\000\255\255\000\000\000\000\255\255\255\255\255\255\000\000\
     \000\000";
-  Lexing.lex_trans = 
+  Lexing.lex_trans =
    "\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\
     \000\000\014\000\014\000\000\000\014\000\014\000\014\000\000\000\
     \014\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\
@@ -76,7 +76,7 @@ let __ocaml_lex_tables = {
     \000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\
     \000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\
     ";
-  Lexing.lex_check = 
+  Lexing.lex_check =
    "\255\255\255\255\255\255\255\255\255\255\255\255\255\255\255\255\
     \255\255\000\000\000\000\255\255\000\000\014\000\014\000\255\255\
     \014\000\255\255\255\255\255\255\255\255\255\255\255\255\255\255\
@@ -123,22 +123,22 @@ let __ocaml_lex_tables = {
     \255\255\255\255\255\255\255\255\255\255\255\255\255\255\255\255\
     \255\255\255\255\255\255\255\255\255\255\255\255\255\255\255\255\
     ";
-  Lexing.lex_base_code = 
+  Lexing.lex_base_code =
    "";
-  Lexing.lex_backtrk_code = 
+  Lexing.lex_backtrk_code =
    "";
-  Lexing.lex_default_code = 
+  Lexing.lex_default_code =
    "";
-  Lexing.lex_trans_code = 
+  Lexing.lex_trans_code =
    "";
-  Lexing.lex_check_code = 
+  Lexing.lex_check_code =
    "";
-  Lexing.lex_code = 
+  Lexing.lex_code =
    "";
 }
 
 let rec main lexbuf =
-    __ocaml_lex_main_rec lexbuf 0
+   __ocaml_lex_main_rec lexbuf 0
 and __ocaml_lex_main_rec lexbuf __ocaml_lex_state =
   match Lexing.engine __ocaml_lex_tables __ocaml_lex_state lexbuf with
       | 0 ->
@@ -216,7 +216,7 @@ and __ocaml_lex_main_rec lexbuf __ocaml_lex_state =
       ( exit 0 )
 # 218 "lexer.ml"
 
-  | __ocaml_lex_state -> lexbuf.Lexing.refill_buff lexbuf; 
+  | __ocaml_lex_state -> lexbuf.Lexing.refill_buff lexbuf;
       __ocaml_lex_main_rec lexbuf __ocaml_lex_state
 
 ;;

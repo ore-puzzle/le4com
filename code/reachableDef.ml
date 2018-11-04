@@ -4,7 +4,7 @@ open Dfa
 module Set = MySet
 
 
-let dummy = (-1, "-1")
+let dummy = (-1, (-1, -1))
 
 let bottom = Set.empty
 
@@ -19,9 +19,9 @@ let compare left right =
 let lub old_entry_prop prop stmt = Set.union old_entry_prop prop
 
 let string_of_def (ofs, (b_index, s_index)) =
-  "(" ^ (Vm.string_of_operand (Local ofs)) ^ ", " ^ (string_of_int b_index) ^ (stirng_of_int s_index) ^ ")"
+  "(" ^ (Vm.string_of_operand (Local ofs)) ^ ", " ^ (string_of_int b_index) ^ (string_of_int s_index) ^ ")"
 
-let string_of_defs vs =
+let string_of_defs (vs: (id * (int * int)) Set.t) =
   String.concat ", "
     (List.sort String.compare
        (List.map string_of_def
@@ -38,9 +38,7 @@ let rec remove dst = function
       if dst = dst' then rest
       else head :: (remove dst rest)
 
-let location stmt =
-  let (b_index, s_index) = find_stmt !cfg stmt in
-  (string_of_int b_index, string_of_int s_index)
+let location stmt = find_stmt !cfg stmt 
 
 let transfer entry_defs stmt =
   let gen vs =
