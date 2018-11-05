@@ -1,1 +1,1 @@
-opt.ml: Cfg ConstantFolding CopyPropagation Dfa List Live MyMap MySet ReachableCopy ReachableDef Reg Vm
+opt.ml: Cfg ConstantFolding CopyPropagation DeadCodeElimination Dfa List Live MyMap MySet ReachableCopy ReachableDef Reg Vm

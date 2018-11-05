@@ -1,8 +1,24 @@
 digraph CFG {
   node [shape=record fontname="courier"]
+  _b__f00 [label="{_b__f0:\l|\{p0, p1\}\l\<BEGIN: _b__f0\>\l\{p0, p1\}\l}"];
+  _b__f01 [label="{\{p0, p1\}\lread  t1 #1(p0)\l\{p1, t1\}\lnew  t2 [p1, 0]\l\{t1, t2\}\l}"];
+  _b__f02 [label="{L_b__f0_0:\l|\{t1, t2\}\lread  t3 #0(t2)\l\{t1, t2, t3\}\llt  t4, 0, t3\l\{t1, t2, t4\}\lbif  t4, L_b__f0_1\l\{t1, t2\}\l}"];
+  _b__f03 [label="{\{t2\}\lread  t0 #1(t2)\l\{t0\}\lgoto  L_b__f0_2\l\{t0\}\l}"];
+  _b__f04 [label="{L_b__f0_1:\l|\{t1, t2\}\lread  t5 #0(t2)\l\{t1, t2, t5\}\ladd  t6, t5, -1\l\{t1, t2, t6\}\lread  t7 #1(t2)\l\{t1, t6, t7\}\ladd  t8, t7, t1\l\{t1, t6, t8\}\lnew  t9 [t6, t8]\l\{t1, t9\}\lmove  t2, t9\l\{t1, t2\}\lgoto  L_b__f0_0\l\{t1, t2\}\l}"];
+  _b__f05 [label="{L_b__f0_2:\l|\{t0\}\lret  t0\l\{\}\l}"];
+  _b__f06 [label="{\{\}\l\<END: _b__f0\>\l\{\}\l}"];
+
+  _b__f00 -> _b__f01
+  _b__f01 -> _b__f02
+  _b__f02 -> _b__f04
+  _b__f02 -> _b__f03
+  _b__f03 -> _b__f05
+  _b__f04 -> _b__f02
+  _b__f05 -> _b__f06
+  
   _toplevel0 [label="{_toplevel:\l|\{\}\l\<BEGIN: _toplevel\>\l\{\}\l}"];
-  _toplevel1 [label="{\{\}\lnew  t1 [0, 1]\l\{(t1, 10)\}\lread  t0 #0(t1)\l\{(t0, 11), (t1, 10)\}\lret  t0\l\{(t0, 11), (t1, 10)\}\l}"];
-  _toplevel2 [label="{\{(t0, 11), (t1, 10)\}\l\<END: _toplevel\>\l\{(t0, 11), (t1, 10)\}\l}"];
+  _toplevel1 [label="{\{\}\lmove  t1, 8\l\{\}\lnew  t2 [_b__f0, 8]\l\{t2\}\lmove  t3, t2\l\{t2\}\lread  t4 #0(t2)\l\{t2, t4\}\lcall  t0, t4(t2, 9)\l\{t0\}\lret  t0\l\{\}\l}"];
+  _toplevel2 [label="{\{\}\l\<END: _toplevel\>\l\{\}\l}"];
 
   _toplevel0 -> _toplevel1
   _toplevel1 -> _toplevel2
