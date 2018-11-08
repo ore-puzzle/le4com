@@ -192,6 +192,17 @@ let rec make_node_color_list node_num =
   | n -> (n-1, dummy) :: make_node_color_list (n-1) 
 
 
+let sort_by_degree_desc node_color adjacency_matrix =
+  let f nc1 nc2 =
+    let (n1, _) = nc1 in
+    let (n2, _) = nc2 in
+    let degree_of_n1 = Array.fold_left (+) 0 adjacency_matrix.(n1) in
+    let degree_of_n2 = Array.fold_left (+) 0 adjacency_matrix.(n2) in
+    if degree_of_n1 < degree_of_n2 then -1
+    else if degree_of_n1 = degree_of_n2 then 0
+    else 1 in
+  List.rev (List.sort f node_color) 
+
 let rec get_color node = function
     [] -> err "no such node"
   | (node', color) :: rest ->
@@ -221,43 +232,13 @@ let rop_of_vop map = function
   | Vm.IntV i -> IntV i
 
 
-(*let rec add_flag_0 = function
-    [] -> []
-  | head :: rest -> (head, 0) :: add_flag_0 rest
-
-
-let rec mark label = function
-    [] -> []  (* ここには来ないはず *)
-  | (inst, flag) :: rest ->
-     (match inst with
-        Vm.Label label' when label = label' -> (inst, 1) :: rest
-      | _ -> (inst, flag) :: mark label rest)
-
-
-let preprocess map insts =
-  let rec body_loop = function
-      [] -> []
-    | (inst, flag) as head :: rest ->
-       (match inst with
-          Vm.BranchIf (Local id, label) ->
-           (match List.assoc id map with
-              L ofs -> head :: body_loop (mark label rest)
-            | _ -> head :: body_loop rest)
-        | _ -> head :: body_loop rest)
-  in
-    let flaged_insts = add_flag_0 insts in
-    body_loop flaged_insts*)
-
-
-
-
 let rop_of_vop = function
     Vm.Param i -> Param i
   | Vm.Local id -> err "For debug: this line cannot be done"
   | Vm.Proc l -> Proc l
   | Vm.IntV i -> IntV i
 
-let make_assign dest index op map (* available_regs is not needed *) =
+let make_assign dest index op map =
   match op with
     Vm.Local id ->
      (match List.assoc id map with
@@ -266,31 +247,6 @@ let make_assign dest index op map (* available_regs is not needed *) =
                   Assign (dest, index, Reg reserved_reg)])
   | _ -> [Assign (dest, index, rop_of_vop op)]
 
-(*let make_assign_case_dest_is_local dest index op map available_regs =
-  match op with
-    Vm.Local id ->
-     (match List.assoc id map with
-        R reg -> [Assign (dest, index, Reg reg)]
-      | L ofs -> 
-          if List.length available_regs <> 0 then
-            let free_reg = List.hd available_regs in
-            [Load (free_reg, ofs);
-             Assign (dest, index, Reg free_reg)]
-          else
-            [Store (0, tmp);
-             Load (0, ofs);
-             Assign (dest, index, Reg 0);
-             Load (0, tmp)])
-  | _ -> [Assign (dest, index, rop_of_vop op)]*)
-
-(*let make_assigns dest ops map available_regs =
-  let rec body_loop make_assign index = function
-      [] -> []
-    | head :: rest -> (make_assign dest index head map available_regs) :: body_loop make_assign (index+1) rest
-  in
-    match dest with
-      R reg -> body_loop make_assign_case_dest_is_reg 0 ops
-    | L ofs -> body_loop make_assign_case_dest_is_local 0 ops *)
 
 let make_assigns dest ops map =
   let rec body_loop index = function
@@ -682,7 +638,8 @@ let trans_decl nreg lives (Vm.ProcDecl (lbl, nlocal, instrs)) =
   let ofses = trans_props_from_op_to_ofs props in
   let node_color = List.rev (make_node_color_list nlocal) in
   let adjacency_matrix = make_adjacency_matrix ofses nlocal in
-  let (map, local_num) = make_map nreg (paint node_color adjacency_matrix node_color) in
+  let ordered_node_color = sort_by_degree_desc node_color adjacency_matrix in
+  let (map, local_num) = make_map nreg (paint node_color adjacency_matrix ordered_node_color) in
   let new_nlocal = local_num + get_max_tmp instrs lives map 0 in
   let regs = MySet.from_list (make_regs nreg) in
   let insts' = trans_instrs nreg lives map local_num regs instrs in

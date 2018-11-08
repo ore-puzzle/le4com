@@ -8,7 +8,6 @@ type id = S.id
 type binOp = S.binOp
 
 let fresh_id = Misc.fresh_id_maker "_"
-let pre_fresh_id = Misc.fresh_id_maker "$"
 
 (* ==== 値 ==== *)
 type value =
@@ -99,6 +98,14 @@ let vk k ce =
   | _ -> 
       let v = fresh_id "v" in LetExp (v, ce, k (Var v))
 
+(* freshなidを作成 *)
+let make_new_id id =
+  if id.[0] = '$' then
+    let [name; suffix] = String.split_on_char '#' id in
+    name ^ "#" ^ string_of_int ((int_of_string suffix) + 1)
+  else
+    "$" ^ id ^ "#0"
+
 (* exp中のすべてのidをnew_idに置き換える *)
 let rename exp id new_id =
   let rec body_loop exp =
@@ -132,27 +139,21 @@ let rec preprocess exp id_list = (* id_listは束縛されているidの集合 *
         S.IfExp (preprocess e1 id_list, preprocess e2 id_list, preprocess e3 id_list)
     | S.LetExp (id, e1, e2) -> 
         if List.mem id id_list then 
-          let new_id = 
-            if id.[0] = '$' then pre_fresh_id (String.sub id 1 ((String.length id) - 2)) (* $が増えていくことを防ぐ *)
-            else pre_fresh_id id in
+          let new_id = make_new_id id in
           S.LetExp (new_id, preprocess e1 id_list, preprocess (rename e2 id new_id) (new_id :: id_list))
         else
           S.LetExp (id, preprocess e1 id_list, preprocess e2 (id :: id_list))
     | S.AppExp (e1, e2) -> S.AppExp (preprocess e1 id_list, preprocess e2 id_list)
     | S.LetRecExp (id1, id2, e1, e2) ->
         if List.mem id1 id_list then 
-          let new_id = 
-            if id1.[0] = '$' then pre_fresh_id (String.sub id1 1 ((String.length id1) - 2)) (* $が増えていくことを防ぐ *)
-            else pre_fresh_id id1 in
+          let new_id = make_new_id id1 in
           let S.LetRecExp (id1', id2', e1', e2') = rename exp id1 new_id in
           S.LetRecExp (id1', id2', preprocess e1' (id1' :: id2' :: id_list), preprocess e2' (id1' :: id_list))
         else 
           S.LetRecExp (id1, id2, preprocess e1 (id1 :: id2 :: id_list), preprocess e2 (id1 :: id_list))
     | S.LoopExp (id, e1, e2) ->
         if List.mem id id_list then 
-          let new_id = 
-            if id.[0] = '$' then pre_fresh_id (String.sub id 1 ((String.length id) - 2)) (* $が増えていくことを防ぐ *)
-            else pre_fresh_id id in
+          let new_id = make_new_id id in
           S.LoopExp (new_id, preprocess e1 id_list, preprocess (rename e2 id new_id) (new_id :: id_list))
         else
           S.LoopExp (id, preprocess e1 id_list, preprocess e2 (id :: id_list))
