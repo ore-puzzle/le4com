@@ -466,7 +466,7 @@ let make_call_instr dest op op1 op2 available_regs escaped_regs map =
     | _, _, _ ->
         [Call (dest, rop_of_vop op, [rop_of_vop op1; rop_of_vop op2])] 
 
-let trans_inst map inst local_num lives available_regs =
+let trans_inst map inst (*local_num*) lives available_regs =
   match inst with
     Vm.Move (id, op) -> 
      (match List.assoc id map, op with
@@ -592,7 +592,7 @@ let trans_inst map inst local_num lives available_regs =
   | Vm.Call (id, op, ops) ->
       let prop = Dfa.get_property lives inst Cfg.AFTER in
       let should_escaped_regs = map_property (MySet.to_list (MySet.diff prop (MySet.singleton (Vm.Local id)))) map in
-      let (stores, loads) = make_escape_recover_instrs (local_num + 2) should_escaped_regs in 
+      let (stores, loads) = make_escape_recover_instrs 0 should_escaped_regs in 
       let dest = List.assoc id map in
       let (op1, op2) = match ops with arg1 :: [arg2] -> (arg1, arg2) in
       let call_instrs = make_call_instr dest op op1 op2 available_regs should_escaped_regs map in
@@ -618,7 +618,7 @@ let trans_inst map inst local_num lives available_regs =
                        Read (dest, Reg reserved_reg, i)])
       | _ -> [Read (dest, rop_of_vop op, i)]
 
-let trans_instrs nreg lives map local_num regs instrs =
+let trans_instrs nreg lives map regs instrs =
   let rec body_loop = function
     [] -> []
   | head :: rest ->
@@ -628,7 +628,7 @@ let trans_instrs nreg lives map local_num regs instrs =
         | _ -> Dfa.get_property lives head Cfg.BEFORE in 
       let using_regs = MySet.from_list (map_property (MySet.to_list prop) map) in
       let available_regs = MySet.to_list (MySet.diff regs using_regs) in 
-      (trans_inst map head local_num lives available_regs) :: body_loop rest
+      (trans_inst map head lives available_regs) :: body_loop rest
   in
     body_loop instrs
       
@@ -642,7 +642,7 @@ let trans_decl nreg lives (Vm.ProcDecl (lbl, nlocal, instrs)) =
   let (map, local_num) = make_map nreg (paint node_color adjacency_matrix ordered_node_color) in
   let new_nlocal = local_num + get_max_tmp instrs lives map 0 in
   let regs = MySet.from_list (make_regs nreg) in
-  let insts' = trans_instrs nreg lives map local_num regs instrs in
+  let insts' = trans_instrs nreg lives map regs instrs in
   ProcDecl (lbl, new_nlocal, List.concat insts')
 
 (* entry point *)

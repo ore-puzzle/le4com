@@ -104,9 +104,11 @@ let gen_decl (Vm.ProcDecl (name, nlocal, instrs)) =
     | Vm.Malloc (id, ops) ->
         let part_of_instr = make_instr_of_malloc A1 ops in
         [Instr (Str (A1, mem_access Sp 0));
+         Instr (Str (A2, mem_access Sp 1));
          Instr (Mov (A1, (I (List.length ops))));
          Instr (Bl "mymalloc");
-         Instr (Str (A1, local_access id))] @
+         Instr (Str (A1, local_access id));
+         Instr (Ldr (A2, mem_access Sp 1))] @
          part_of_instr @
         [Instr (Ldr (A1, mem_access Sp 0))]       
     | Vm.Read (id, op, i) ->

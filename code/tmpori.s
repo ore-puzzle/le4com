@@ -10,11 +10,9 @@ _b__f0:
 	ldr	v1, [v1, #4]
 	str	v1, [fp, #-12]
 	str	a1, [sp, #0]
-	str	a2, [sp, #4]
 	mov	a1, #2
 	bl	mymalloc
 	str	a1, [fp, #-16]
-	ldr	a2, [sp, #4]
 	mov	v1, a2
 	str	v1, [a1, #0]
 	mov	v1, #0
@@ -57,11 +55,9 @@ L_b__f0_1:
 	add	v1, v1, v2
 	str	v1, [fp, #-40]
 	str	a1, [sp, #0]
-	str	a2, [sp, #4]
 	mov	a1, #2
 	bl	mymalloc
 	str	a1, [fp, #-44]
-	ldr	a2, [sp, #4]
 	ldr	v1, [fp, #-32]
 	str	v1, [a1, #0]
 	ldr	v1, [fp, #-40]
@@ -88,11 +84,9 @@ _toplevel:
 	mov	v1, #8
 	str	v1, [fp, #-12]
 	str	a1, [sp, #0]
-	str	a2, [sp, #4]
 	mov	a1, #2
 	bl	mymalloc
 	str	a1, [fp, #-16]
-	ldr	a2, [sp, #4]
 	ldr	v1, =_b__f0
 	str	v1, [a1, #0]
 	ldr	v1, [fp, #-12]

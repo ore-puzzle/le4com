@@ -1,18 +1,30 @@
 digraph CFG {
   node [shape=record fontname="courier"]
+  _b_app0 [label="{_b_app:\l|\{p1\}\l\<BEGIN: _b_app\>\l\{p1\}\l}"];
+  _b_app1 [label="{\{p1\}\lnew  t1 [_b__f1, p1]\l\{t1\}\lret  t1\l\{\}\l}"];
+  _b_app2 [label="{\{\}\l\<END: _b_app\>\l\{\}\l}"];
+
+  _b_app0 -> _b_app1
+  _b_app1 -> _b_app2
+  
+  _b__f10 [label="{_b__f1:\l|\{p0, p1\}\l\<BEGIN: _b__f1\>\l\{p0, p1\}\l}"];
+  _b__f11 [label="{\{p0, p1\}\lread  t1 #1(p0)\l\{p1, t1\}\lread  t2 #0(t1)\l\{p1, t1, t2\}\lcall  t0, t2(t1, p1)\l\{t0\}\lret  t0\l\{\}\l}"];
+  _b__f12 [label="{\{\}\l\<END: _b__f1\>\l\{\}\l}"];
+
+  _b__f10 -> _b__f11
+  _b__f11 -> _b__f12
+  
+  _b__f00 [label="{_b__f0:\l|\{p1\}\l\<BEGIN: _b__f0\>\l\{p1\}\l}"];
+  _b__f01 [label="{\{p1\}\lmul  t0, p1, 2\l\{t0\}\lret  t0\l\{\}\l}"];
+  _b__f02 [label="{\{\}\l\<END: _b__f0\>\l\{\}\l}"];
+
+  _b__f00 -> _b__f01
+  _b__f01 -> _b__f02
+  
   _toplevel0 [label="{_toplevel:\l|\{\}\l\<BEGIN: _toplevel\>\l\{\}\l}"];
-  _toplevel1 [label="{\{\}\lnew  t1 [10, 0]\l\{t1\}\l}"];
-  _toplevel2 [label="{L_toplevel_0:\l|\{t1\}\lread  t2 #0(t1)\l\{t1, t2\}\llt  t3, 0, t2\l\{t1, t3\}\lbif  t3, L_toplevel_1\l\{t1\}\l}"];
-  _toplevel3 [label="{\{t1\}\lread  t0 #1(t1)\l\{t0\}\lgoto  L_toplevel_2\l\{t0\}\l}"];
-  _toplevel4 [label="{L_toplevel_1:\l|\{t1\}\lread  t4 #0(t1)\l\{t1, t4\}\ladd  t5, t4, -1\l\{t1, t5\}\lread  t6 #1(t1)\l\{t1, t5, t6\}\lread  t7 #0(t1)\l\{t5, t6, t7\}\ladd  t8, t6, t7\l\{t5, t8\}\lnew  t9 [t5, t8]\l\{t9\}\lmove  t1, t9\l\{t1\}\lgoto  L_toplevel_0\l\{t1\}\l}"];
-  _toplevel5 [label="{L_toplevel_2:\l|\{t0\}\lret  t0\l\{\}\l}"];
-  _toplevel6 [label="{\{\}\l\<END: _toplevel\>\l\{\}\l}"];
+  _toplevel1 [label="{\{\}\lnew  t1 [_b_app]\l\{t1\}\lnew  t2 [_b__f0]\l\{t1, t2\}\lread  t4 #0(t1)\l\{t1, t2, t4\}\lcall  t5, t4(t1, t2)\l\{t5\}\lread  t6 #0(t5)\l\{t5, t6\}\lcall  t0, t6(t5, 3)\l\{t0\}\lret  t0\l\{\}\l}"];
+  _toplevel2 [label="{\{\}\l\<END: _toplevel\>\l\{\}\l}"];
 
   _toplevel0 -> _toplevel1
   _toplevel1 -> _toplevel2
-  _toplevel2 -> _toplevel4
-  _toplevel2 -> _toplevel3
-  _toplevel3 -> _toplevel5
-  _toplevel4 -> _toplevel2
-  _toplevel5 -> _toplevel6
   }
