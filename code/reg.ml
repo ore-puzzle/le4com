@@ -89,8 +89,8 @@ let string_of_instr idt tab = function
       idt ^ "new" ^ tab ^ string_of_dest t ^ " [" ^
       string_of_int i ^ "]"
   | Assign (t, i, v) ->
-      idt ^ "asn" ^ tab ^ "#" ^ string_of_int i ^ "(" ^ string_of_dest t ^
-      ") " ^ string_of_operand v
+      idt ^ "asn" ^ tab ^ string_of_operand v ^ " #" ^ string_of_int i 
+      ^ "(" ^ string_of_dest t ^ ") "
   | Read (t, v, i) ->
       idt ^ "read" ^ tab ^ string_of_dest t ^ " #" ^
       string_of_int i ^ "(" ^ string_of_operand v ^ ")"
@@ -106,7 +106,7 @@ let string_of_reg prog =
 (* ==== constant ==== *)
 let dummy = -1 
 
-let tmp = 2
+let tmp = 0
 
 (* ==== for debug ==== *)
 
@@ -140,6 +140,26 @@ let rec string_of_map = function
       "(" ^ (string_of_int a) ^ ", " ^ (string_of_dest b) ^ ")" ^ "; " ^
       (string_of_map rest)
 
+let rec string_of_node_color = function
+    [] -> ""
+  | (node, color) :: rest ->
+      "(" ^ (string_of_int node) ^ ", " ^ (string_of_int color) ^ ")" ^ "; " ^
+      (string_of_node_color rest)
+
+let string_of_int_list l =
+  let rec body_loop = function
+      [] -> ""
+    | i :: rest -> string_of_int i ^ ";" ^ body_loop rest
+  in
+    "[" ^ body_loop l ^ "]"
+
+let string_of_int_list_list l = 
+  let rec body_loop = function
+      [] -> ""
+    | i_list :: rest -> string_of_int_list i_list ^ ";" ^ body_loop rest
+  in
+    "[" ^ body_loop l ^ "]"
+
 (* ==== support function ==== *)
 
 let rec get_properties_as_list lives = function
@@ -151,24 +171,18 @@ let rec get_properties_as_list lives = function
              (MySet.to_list (Dfa.get_property lives stmt Cfg.AFTER)) ::
               get_properties_as_list lives rest)
 
-let trans_props_from_op_to_ofs props =
-  let rec outer_loop props =
-    match props with
-      [] -> []
-    | head :: rest -> (inner_loop head) :: outer_loop rest
-  and inner_loop prop =
-    match prop with
-      [] -> []
-    | head :: rest ->
-       (match head with
-          Vm.Local ofs when ofs <> -1-> ofs :: inner_loop rest
-        | _ -> inner_loop rest)
-  in
-    outer_loop props
+
+let rec trans_props_from_op_to_ofs = function
+    [] -> []
+  | prop :: rest ->
+      List.map (fun (Vm.Local ofs) -> ofs) 
+               (List.filter 
+                 (fun op -> match op with Vm.Local ofs when ofs <> -1 -> true | _ -> false) prop) ::
+      trans_props_from_op_to_ofs rest
 
 
 
-let make_adjacency_matrix ofses size =
+let make_adjacency_matrix ofses size instrs =
   let matrix = Array.make_matrix size size 0 in
   let rec outer_loop = function
       [] -> ()
@@ -180,11 +194,23 @@ let make_adjacency_matrix ofses size =
           matrix.(head).(List.nth rest i) <- 1;
           matrix.(List.nth rest i).(head) <- 1
         done;
-        inner_loop rest
+        inner_loop rest 
+  and outer_loop_for_asn = function
+      [] -> ()
+    | Vm.Malloc (id, ops) :: rest -> inner_loop_for_asn id ops; outer_loop_for_asn rest
+  and inner_loop_for_asn ofs = function
+      [] -> () (* not done *)
+    | head :: rest ->
+       (match head with
+          Vm.Local ofs' ->
+            matrix.(ofs).(ofs') <- 1;
+            matrix.(ofs').(ofs) <- 1;
+            inner_loop_for_asn ofs rest
+        | _ -> inner_loop_for_asn ofs rest)
   in
     outer_loop ofses;
+    outer_loop_for_asn (List.filter (fun instr -> match instr with Vm.Malloc _ -> true | _ -> false) instrs);
     matrix
-
 
 let rec make_node_color_list node_num =
   match node_num with
@@ -192,7 +218,7 @@ let rec make_node_color_list node_num =
   | n -> (n-1, dummy) :: make_node_color_list (n-1) 
 
 
-let sort_by_degree_desc node_color adjacency_matrix =
+let sort_by_degree node_color adjacency_matrix =
   let f nc1 nc2 =
     let (n1, _) = nc1 in
     let (n2, _) = nc2 in
@@ -201,7 +227,7 @@ let sort_by_degree_desc node_color adjacency_matrix =
     if degree_of_n1 < degree_of_n2 then -1
     else if degree_of_n1 = degree_of_n2 then 0
     else 1 in
-  List.rev (List.sort f node_color) 
+  List.stable_sort f node_color 
 
 let rec get_color node = function
     [] -> err "no such node"
@@ -322,7 +348,7 @@ let make_map nreg painted_node_color =
           ((node, R color) :: tail, result_local_num)
         else 
           let (tail, result_local_num) = body_loop nreg (local_num+1) rest in
-          ((node, L (color - nreg + 2)) :: tail, result_local_num)
+          ((node, L (color - nreg + 1)) :: tail, result_local_num)
   in
     body_loop nreg 0 painted_node_color
 
@@ -466,7 +492,7 @@ let make_call_instr dest op op1 op2 available_regs escaped_regs map =
     | _, _, _ ->
         [Call (dest, rop_of_vop op, [rop_of_vop op1; rop_of_vop op2])] 
 
-let trans_inst map inst (*local_num*) lives available_regs =
+let trans_inst map inst lives available_regs =
   match inst with
     Vm.Move (id, op) -> 
      (match List.assoc id map, op with
@@ -482,69 +508,6 @@ let trans_inst map inst (*local_num*) lives available_regs =
                        Store (reserved_reg, ofs)])
       | L ofs, _ -> [Move (reserved_reg, rop_of_vop op);
                      Store (reserved_reg, ofs)])
- (* | Vm.BinOp (id, binOp, op1, op2) ->
-     (match List.assoc id map, op1, op2 with
-        R reg, Vm.Local id1, Vm.Local id2 ->
-         (match List.assoc id1 map, List.assoc id2 map with
-            R reg1, R reg1 -> [BinOp (reg, binOp, Reg reg1, Reg reg2)]
-          | R reg1, L ofs2 -> [Load (reserved_reg, ofs2);
-                               BinOp (reg, binOp, Reg reg1, Reg reserved_reg)]
-          | L ofs1, R reg2 -> [Load (reserved_reg, ofs1);
-                               BinOp (reg, binOp, Reg reserved_reg, Reg reg2)]
-          | L ofs1, L ofs2 -> [Load (reserved_reg, ofs1);
-                               Load (reg, ofs2);
-                               BinOp (reg, binOp, Reg reserved_reg, Reg reg)])
-      | R reg, Vm.Local id1, _ ->
-         (match List.assoc id1 map with
-            R reg1 -> [BinOp (reg, binOp, Reg reg1, rop_of_vop op2)]
-          | L ofs1 -> [Load (reserved_reg, ofs1);
-                       BinOp (reg, binOp, Reg reserved_reg, rop_of_vop op2)])
-      | R reg, _, Vm.Local id2 ->
-         (match List.assoc id2 map with
-            R reg2 -> [BinOp (reg, binOp, rop_of_vop op1, Reg reg2)]
-          | L ofs2 -> [Load (reserved_reg, ofs2);
-                       BinOp (reg, binOp, rop_of_vop op1, Reg reserved_reg)])
-      | R reg, _, _ -> [BinOp (reg, binOp, rop_of_vop op1, rop_of_vop op2)]
-      | L ofs, Vm.Local id1, Vm.Local id2 ->
-         (match List.assoc id1 map, List.assoc id2 map with
-            R reg1, R reg1 -> [BinOp (reserved_reg, binOp, Reg reg1, Reg reg2);
-                               Store (reserved_reg, ofs)]
-          | R reg1, L ofs2 -> [Load (reserved_reg, ofs2);
-                               BinOp (reserved_reg, binOp, Reg reg1, Reg reserved_reg);
-                               Store (reserved_reg, ofs)]
-          | L ofs1, R reg2 -> [Load (reserved_reg, ofs1);
-                               BinOp (reserved_reg, binOp, Reg reserved_reg, Reg reg2);
-                               Store (reserved_reg, ofs)]
-          | L ofs1, L ofs2 -> 
-              if List.length available_regs <> 0 then
-                let free_reg = List.hd available_regs in
-                [Load (reserved_reg, ofs1);
-                 Load (free_reg, ofs2);
-                 BinOp (reserved_reg, binOp, Reg reserved_reg, Reg free_reg);
-                 Store (reserved_reg, ofs)])
-              else
-                [Load (reserved_reg, ofs1);
-                 Store (0, tmp);
-                 Load (0, ofs2);
-                 BinOp (reserved_reg, binOp, Reg reserved_reg, Reg 0);
-                 Store (reserved_reg, ofs);
-                 Load (0, tmp)])
-      | L ofs, Vm.Local id1, _ ->
-         (match List.assoc id1 map with
-            R reg1 -> [BinOp (reserved_reg, binOp, Reg reg1, rop_of_vop op2);
-                       Store (reserved_reg, ofs)]
-          | L ofs1 -> [Load (reserved_reg, ofs1);
-                       BinOp (reserved_reg, binOp, Reg reserved_reg, rop_of_vop op2);
-                       Store (reserved_reg, ofs)])
-      | L ofs, _, Vm.Local id2 ->
-         (match List.assoc id2 map with
-            R reg2 -> [BinOp (reserved_reg, binOp, rop_of_vop op1, Reg reg2);
-                       Store (reserved_reg, ofs)]
-          | L ofs2 -> [Load (reserved_reg, ofs2);
-                       BinOp (reserved_reg, binOp, rop_of_vop op1, Reg reserved_reg);
-                       Store (reserved_reg, ofs)])
-      | L ofs, _, _ -> [BinOp (reserved_reg, binOp, rop_of_vop op1, rop_of_vop op2);
-                        Store (reserved_reg, ofs)]*)
   | Vm.BinOp (id, binOp, op1, op2) ->
       let (store, dist_reg) = 
         match List.assoc id map with 
@@ -637,9 +600,9 @@ let trans_decl nreg lives (Vm.ProcDecl (lbl, nlocal, instrs)) =
   let props = get_properties_as_list lives instrs in
   let ofses = trans_props_from_op_to_ofs props in
   let node_color = List.rev (make_node_color_list nlocal) in
-  let adjacency_matrix = make_adjacency_matrix ofses nlocal in
-  let ordered_node_color = sort_by_degree_desc node_color adjacency_matrix in
-  let (map, local_num) = make_map nreg (paint node_color adjacency_matrix ordered_node_color) in
+  let adjacency_matrix = make_adjacency_matrix ofses nlocal instrs in
+  let ordered_node_color = sort_by_degree node_color adjacency_matrix in
+  let (map, local_num) = make_map nreg (paint ordered_node_color adjacency_matrix ordered_node_color) in
   let new_nlocal = local_num + get_max_tmp instrs lives map 0 in
   let regs = MySet.from_list (make_regs nreg) in
   let insts' = trans_instrs nreg lives map regs instrs in

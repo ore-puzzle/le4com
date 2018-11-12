@@ -102,8 +102,17 @@ let fold defs cfg instr =
   | Goto l -> Goto l
   | Call (id, op_f, ops) ->
       let prop = MySet.to_list (Dfa.get_property defs instr BEFORE) in
+      let subset = get_subset op_f prop in
+      let op_f' =
+        match subset with
+          [(_, (b_idx, s_idx))] ->
+            let stmt = cfg.(b_idx).stmts.(s_idx) in
+           (match stmt with
+              Move (_, Proc l) -> Proc l
+            | _ -> op_f) 
+        | _ -> op_f in
       let ops' = ops_to_ops' cfg prop ops in
-      Call (id, op_f, ops')
+      Call (id, op_f', ops')
   | Return op ->
       let prop = MySet.to_list (Dfa.get_property defs instr BEFORE) in
       let subset = get_subset op prop in
@@ -130,10 +139,13 @@ let fold defs cfg instr =
          (match stmt with
             Malloc (_, ops) ->
              (match List.nth ops i with
-                IntV i -> 
+                Proc l ->
+                  update cfg instr (Move (id, Proc l));
+                  Move (id, Proc l)
+              | IntV i -> 
                   update cfg instr (Move (id, IntV i));
                   Move (id, IntV i)
-                | _ -> instr)                
+              | _ -> instr)                
           | _ -> instr)                        
       | _ -> instr
 

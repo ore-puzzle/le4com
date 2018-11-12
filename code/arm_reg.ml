@@ -53,6 +53,7 @@ let reg_of_param_or_reg = function
   | Reg.Reg reg -> reg_of reg
   | _ -> err "For debug: this statement cannot be done"
 
+
 let fresh_label =
   let counter = ref 0 in
   let body str =
@@ -79,7 +80,7 @@ let gen_decl (Reg.ProcDecl (name, nlocal, instrs)) =
         let (r2, addr, li, intv_other_flag) =
           match op1, op2 with
             Reg.IntV i1, Reg.IntV i2 -> 
-              (reg_of Reg.reserved_reg, I i2, [Instr (Mov (reg_of Reg.reserved_reg, I i1))], false)
+              (A3, I i2, [Instr (Mov (A3, I i1))], false)
           | Reg.IntV i1, _ -> (reg_of_param_or_reg op2, I i1, [], true)
           | _, Reg.IntV i2 -> (reg_of_param_or_reg op1, I i2, [], false)
           | _, _ -> (reg_of_param_or_reg op1, addr_of_rop op2, [], false) in
@@ -88,15 +89,15 @@ let gen_decl (Reg.ProcDecl (name, nlocal, instrs)) =
         | Mult -> 
             li @ 
            (match addr with
-              R reg -> [Instr (Mul (r1, r2, addr))]
-            | I i -> [Instr (Mov (A3, I i)); Instr (Mul (r1, r2, R A3))])
+              R reg -> [Instr (Mul (r1, r2, reg))]
+            | I i -> [Instr (Mov (A4, I i)); Instr (Mul (r1, r2, A4))])
         | Lt ->
             let l1 = fresh_label name in
             let l2 = fresh_label name in
             li @
             (match intv_other_flag with
-               true -> [Instr (Mov (reg_of Reg.reserved_reg, addr_of_rop op1));
-                        Instr (Cmp (reg_of Reg.reserved_reg, addr_of_rop op2))]
+               true -> [Instr (Mov (A3, addr_of_rop op1));
+                        Instr (Cmp (A3, addr_of_rop op2))]
              | false -> [Instr (Cmp (r2, addr))]) @
             [Instr (Blt l1);
              Instr (Mov (r1, I 0));
@@ -108,19 +109,20 @@ let gen_decl (Reg.ProcDecl (name, nlocal, instrs)) =
     | Reg.BranchIf (op, label) ->
         let (r, li) = 
           match op with
-            Reg.IntV i-> (reg_of (Reg.reserved_reg), gen_operand (reg_of Reg.reserved_reg) op)
+            Reg.IntV i -> (A3, gen_operand A3 op)
           | _ -> (reg_of_param_or_reg op, []) in
         li @
         [Instr (Cmp (r, I 0));
          Instr (Bne label)]
     | Reg.Goto label -> [Instr (B label)]
     | Reg.Call (dest, op_f, [op1; op2]) ->
-        let r = reg_of_param_or_reg op_f in
         [Instr (Str (A1, mem_access Sp 0));
          Instr (Str (A2, mem_access Sp 1))] @
         (gen_operand A1 op1) @
         (gen_operand A2 op2) @
-        [Instr (Blx r)] @
+        (match op_f with
+           Reg.Proc l -> [Instr (Bl l)]
+         | Reg.Reg reg -> [Instr (Blx (reg_of reg))]) @
         (match dest with
            Reg.R reg -> [Instr (Mov (reg_of reg, R A1))]
          | Reg.L ofs -> [Instr (Str (A1, local_access ofs))]) @
@@ -145,22 +147,22 @@ let gen_decl (Reg.ProcDecl (name, nlocal, instrs)) =
            (match op with
               Reg.Param p -> [Instr (Str (param_to_reg p, mem_access (reg_of reg) i))]
             | Reg.Reg r -> [Instr (Str (reg_of r, mem_access (reg_of reg) i))]
-            | _ -> (gen_operand (reg_of Reg.reserved_reg) op) @
-                   [Instr (Str (reg_of Reg.reserved_reg, mem_access (reg_of reg) i))])
-       | Reg.L ofs ->
-           [Instr (Ldr (reg_of Reg.reserved_reg, local_access ofs))] @
-           (match op with
-              Reg.Param p -> [Instr (Str (param_to_reg p, mem_access (reg_of Reg.reserved_reg) i))]
-            | Reg.Reg r -> [Instr (Str (reg_of r, mem_access (reg_of Reg.reserved_reg) i))]
             | _ -> (gen_operand A3 op) @
-                   [Instr (Str (A3, mem_access (reg_of Reg.reserved_reg) i))]))  
+                   [Instr (Str (A3, mem_access (reg_of reg) i))])
+       | Reg.L ofs ->
+           [Instr (Ldr (A3, local_access ofs))] @
+           (match op with
+              Reg.Param p -> [Instr (Str (param_to_reg p, mem_access A3 i))]
+            | Reg.Reg r -> [Instr (Str (reg_of r, mem_access A3 i))]
+            | _ -> (gen_operand A4 op) @
+                   [Instr (Str (A4, mem_access A3 i))]))  
     | Reg.Read (dest, op, i) ->
         let r = reg_of_param_or_reg op in
         match dest with
           Reg.R reg -> 
             [Instr (Ldr (reg_of reg, mem_access r i))]
         | Reg.L ofs ->
-            let rd = reg_of Reg.reserved_reg in
+            let rd = A3 in
             [Instr (Ldr (rd, mem_access r i));
              Instr (Str (rd, local_access ofs))]
   in

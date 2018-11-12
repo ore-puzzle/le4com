@@ -66,7 +66,7 @@ let gen_decl (Vm.ProcDecl (name, nlocal, instrs)) =
         let bop_instr = 
          (match binOp with 
             Plus -> [Instr (Add (V1, V1, (R V2)))]
-          | Mult -> [Instr (Mul (V1, V1, (R V2)))]
+          | Mult -> [Instr (Mul (V1, V1, V2))]
           | Lt ->
               let l1 = fresh_label name in
               let l2 = fresh_label name in

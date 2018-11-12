@@ -192,10 +192,11 @@ let run all_stmts initial_state =
           | L l -> get_label_val state l) in
          step (inc_pc (set_reg_val state r mem_val)) rest
        | Mov (r, addr) -> step (inc_pc (set_reg_val state r (get_addr_val state addr))) rest
-       | Mul (r1, r2, addr) ->
+       | Mul (r1, r2, r3) ->
          let r2_val = get_reg_val state r2 in
-         let addr_val = get_addr_val state addr in
-         step (inc_pc (set_reg_val state r1 (r2_val * addr_val))) rest
+         let r3_val = get_reg_val state r3 in
+      (*   let addr_val = get_addr_val state addr in*)
+         step (inc_pc (set_reg_val state r1 (r2_val * r3_val))) rest
        | Str (r, addr) ->
          let r_val = get_reg_val state r in
          let address = get_addr_val state addr in
