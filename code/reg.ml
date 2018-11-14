@@ -340,7 +340,7 @@ let rec paint node_color adjacency_matrix now_node_color =
 let make_map nreg painted_node_color =
   let rec body_loop nreg local_num = function
       [] -> 
-        if local_num = 0 then ([], local_num)
+        if local_num < 2 then ([], local_num)
         else ([], local_num + 1)
     | (node, color) :: rest ->
         if color < nreg then

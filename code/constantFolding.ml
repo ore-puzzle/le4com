@@ -60,7 +60,35 @@ let fold defs cfg instr =
       let prop = MySet.to_list (Dfa.get_property defs instr BEFORE) in
       let subset1 = get_subset op1 prop in
       let subset2 = get_subset op2 prop in
-      let op1' =
+      match subset1, subset2 with
+        [(_, (b_idx1, s_idx1))], [(_, (b_idx2, s_idx2))] ->
+          let stmt1 = cfg.(b_idx1).stmts.(s_idx1) in
+          let stmt2 = cfg.(b_idx2).stmts.(s_idx2) in
+         (match stmt1, stmt2 with
+            Move (_, IntV i1), Move (_, IntV i2) ->
+              let computed_value =
+                match binOp with
+                  Plus ->  i1 + i2
+                | Mult -> i1 * i2
+                | Lt -> if i1 < i2 then 1 else 0 in
+              update cfg instr (Move (id, IntV computed_value));
+              Move (id, IntV computed_value)
+          | Move (_, IntV i1), BinOp (_, binOp2, op21, op22) ->
+             (match op21, op22 with
+                IntV i, _ ->
+                 (match binOp, binOp2 with
+                    Plus, Plus -> BinOp (id, binOp, i1 + i, op22)
+                  | Mult, Mult -> BinOp (id, binOp, i1 * i, op22)
+                  | _, _ -> BinOp (id, binOp, IntV i1, op2))
+              | _, IntV i ->
+              | _, _ ->)
+          | BinOp (_, binOp1, op11, op12), Move (_, IntV i2) ->
+          | BinOp (_, binOp1, op11, op12), BinOp (_, binOp2, op21, op22) ->
+          | Move (_, IntV i1), _ ->
+          | _, Move (_, IntV i2) ->
+          | _, _ -> 
+      | _ -> 
+      (*let op1' =
         match subset1 with
           [(_, (b_idx1, s_idx1))] ->
             let stmt1 = cfg.(b_idx1).stmts.(s_idx1) in
@@ -85,7 +113,7 @@ let fold defs cfg instr =
             | Lt -> if i1 < i2 then 1 else 0 in
           update cfg instr (Move (id, IntV computed_value));
           Move (id, IntV computed_value)
-      | _ -> BinOp (id, binOp, op1', op2'))
+      | _ -> BinOp (id, binOp, op1', op2'))*)
   | Label l -> Label l
   | BranchIf (op, l) ->
       let prop = MySet.to_list (Dfa.get_property defs instr BEFORE) in
