@@ -116,9 +116,13 @@ let rename exp id new_id =
     | S.LetExp (id', e1, e2) -> 
         if id = id' then S.LetExp (new_id, body_loop e1, body_loop e2)
         else S.LetExp (id', body_loop e1, body_loop e2)
+    | S.FunExp (id', e) ->
+        if id = id' then S.FunExp (new_id, body_loop e)
+        else S.FunExp (id', body_loop e)
     | S.AppExp (e1, e2) -> S.AppExp (body_loop e1, body_loop e2)
     | S.LetRecExp (id1, id2, e1, e2) ->
         if id = id1 then S.LetRecExp (new_id, id2, body_loop e1, body_loop e2)
+        else if id = id2 then S.LetRecExp (id1, new_id, body_loop e1, body_loop e2)
         else S.LetRecExp (id1, id2, body_loop e1, body_loop e2)
     | S.LoopExp (id', e1, e2) ->
         if id = id' then S.LoopExp (new_id, body_loop e1, body_loop e2)
@@ -143,14 +147,37 @@ let rec preprocess exp id_list = (* id_listは束縛されているidの集合 *
           S.LetExp (new_id, preprocess e1 id_list, preprocess (rename e2 id new_id) (new_id :: id_list))
         else
           S.LetExp (id, preprocess e1 id_list, preprocess e2 (id :: id_list))
+    | S.FunExp (id, e) ->
+        if List.mem id id_list then
+          let new_id = make_new_id id in
+          S.FunExp (new_id, preprocess (rename e id new_id) (new_id :: id_list))
+        else 
+          S.FunExp (id, preprocess e (id :: id_list))
     | S.AppExp (e1, e2) -> S.AppExp (preprocess e1 id_list, preprocess e2 id_list)
     | S.LetRecExp (id1, id2, e1, e2) ->
+       (match List.mem id1 id_list, List.mem id2 id_list with 
+          true, true -> 
+            let new_id1 = make_new_id id1 in
+            let new_id2 = make_new_id id2 in
+            let S.LetRecExp (id1', _, e1', e2') = rename exp id1 new_id1 in
+            let e1'' = rename e1' id2 new_id2 in
+            S.LetRecExp (id1', new_id2, preprocess e1'' (id1' :: new_id2 :: id_list), preprocess e2' (id1' :: id_list))
+        | true, false ->
+            let new_id1 = make_new_id id1 in
+            let S.LetRecExp (id1', id2', e1', e2') = rename exp id1 new_id1 in
+            S.LetRecExp (id1', id2', preprocess e1' (id1' :: id2' :: id_list), preprocess e2' (id1' :: id_list))
+        | false, true ->
+            let new_id2 = make_new_id id2 in
+            let e1' = rename e1 id2 new_id2 in
+            S.LetRecExp (id1, new_id2, preprocess e1' (id1 :: new_id2 :: id_list), preprocess e2 (id1 :: id_list))
+        | false, false -> S.LetRecExp (id1, id2, preprocess e1 (id1 :: id2 :: id_list), preprocess e2 (id1 :: id_list)))
+    (*| S.LetRecExp (id1, id2, e1, e2) ->
         if List.mem id1 id_list then 
           let new_id = make_new_id id1 in
           let S.LetRecExp (id1', id2', e1', e2') = rename exp id1 new_id in
           S.LetRecExp (id1', id2', preprocess e1' (id1' :: id2' :: id_list), preprocess e2' (id1' :: id_list))
         else 
-          S.LetRecExp (id1, id2, preprocess e1 (id1 :: id2 :: id_list), preprocess e2 (id1 :: id_list))
+          S.LetRecExp (id1, id2, preprocess e1 (id1 :: id2 :: id_list), preprocess e2 (id1 :: id_list))*)
     | S.LoopExp (id, e1, e2) ->
         if List.mem id id_list then 
           let new_id = make_new_id id in
@@ -188,7 +215,7 @@ let rec norm_exp (e: Syntax.exp) (f: cexp -> exp) = match e with
       norm_exp e1 (fun ce -> LetExp (id, ce, norm_exp e2 f))
   | S.FunExp (id, e') ->
       let f' = fresh_id "f" in
-      let letrecexp = S.LetRecExp (f', id, e', S.Var f') in (* CではなくSのLetRecExpに変換してからnorm_expする *)
+      let letrecexp = S.LetRecExp (f', id, e', S.Var f') in (* NではなくSのLetRecExpに変換してからnorm_expする *)
       norm_exp letrecexp f
   | S.AppExp (e1, e2) ->
       (match e2 with

@@ -107,6 +107,11 @@ let string_of_closure e =
   in layout (pretty 40 (pr_of_exp 0 e))
 
 
+(* ==== for debug ==== *)
+let rec string_of_ids = function
+    [] -> ""
+  | head :: rest -> head ^ "; " ^ string_of_ids rest 
+
 (* ==== support function ==== *)
 
 (* valueの変換 *)
@@ -203,19 +208,20 @@ let convert exp =
     match exp with
       N.CompExp ce ->
        (match ce with
-          N.IfExp (v, e1, e2) -> f (CompExp (IfExp (cvalue_of_nvalue v, body_loop e1 f, body_loop e2 f)))
+          N.IfExp (v, e1, e2) -> f (CompExp (IfExp (cvalue_of_nvalue v, body_loop e1 (fun e -> e), body_loop e2 (fun e -> e))))
         | _ -> f (ccexp_of_ncexp ce (fun ce -> CompExp ce)))
     | N.LetExp (id, ce, e) ->
        (match ce with
-          N.IfExp (v, e1, e2) -> f (LetExp (id, IfExp (cvalue_of_nvalue v, body_loop e1 f, body_loop e2 f), body_loop e (fun e -> e)))
+          N.IfExp (v, e1, e2) -> f (LetExp (id, IfExp (cvalue_of_nvalue v, body_loop e1 (fun e -> e), body_loop e2 (fun e -> e)), body_loop e (fun e -> e)))
         | _ -> f (ccexp_of_ncexp ce (fun ce' -> LetExp (id, ce', body_loop e (fun e -> e)))))
     | N.LetRecExp (id1, id2, e1, e2) ->
         (* idを集める *)
-        let (decl_id_list, var_id_list) = gather_id_from_exp e1 ([id1; id2], []) in
+        let (decl_id_list, var_id_list) = gather_id_from_exp e1 ([id1; id2], []) in     
         (* idの重複をなくす *)
         let (decl_id_set, var_id_set) = (delete_duplication decl_id_list [], delete_duplication var_id_list []) in
         (* var_id_set - decl_id_set をすることで自由変数のidを取り出す *)
         let free_var_id = diff var_id_set decl_id_set in
+        print_string (id1 ^ ": " ^ string_of_ids free_var_id); print_newline();
         (* 自由変数のidにVarをつけてvalueにする *)
         let free_var = var_of_id free_var_id in
         (* 関数名のリネーム *)
@@ -225,7 +231,7 @@ let convert exp =
         (* 自由変数がないなら *)
         if List.length free_var = 0 then
           (* 本体式をクロージャ変換して *)
-          let converted = body_loop e1 f in
+          let converted = body_loop e1 (fun e -> e) in
           (* 元の関数名にクロージャを束縛 *)
           f (LetRecExp (new_id, [id1; id2], converted, LetExp (id1, closure, body_loop e2 (fun e -> e))))
         (* 自由変数があるなら *)
@@ -249,7 +255,7 @@ let convert exp =
             f (LetRecExp (new_id, [id1; id2], converted, LetExp (id1, add_to_closure closure free_var, body_loop e2 (fun e -> e))))
     | N.LoopExp (id, ce, e) ->
        (match ce with
-          N.IfExp (v, e1, e2) -> f (CompExp (IfExp (cvalue_of_nvalue v, body_loop e1 f, body_loop e2 f)))
+          N.IfExp (v, e1, e2) -> f (CompExp (IfExp (cvalue_of_nvalue v, body_loop e1 (fun e -> e), body_loop e2 (fun e -> e))))
         | _ -> f (ccexp_of_ncexp ce (fun ce' -> LoopExp (id, ce', body_loop e (fun e -> e)))))
     | N.RecurExp v -> f (RecurExp (cvalue_of_nvalue v))
   in
