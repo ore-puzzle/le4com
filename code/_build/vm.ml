@@ -89,7 +89,12 @@ let string_of_vm prog =
   String.concat "\n" (List.map string_of_decl prog)
 
 
-(* support function *)
+(* ==== for debug ==== *)
+let rec string_of_ids = function
+    [] -> ""
+  | head :: rest -> head ^ "; " ^ string_of_ids rest 
+
+(* ==== support function ==== *)
 
 let rec gather_id_from_exp = function
     F.CompExp (F.IfExp (_, e1, e2)) ->
@@ -109,7 +114,7 @@ let rec gather_id_from_exp = function
       id :: (id_list1 @ id_list2)
   | _ -> []
 
-let make_delta params ids proc_name =
+let make_delta params ids =
   let rec param_loop params index =
     match params with
       [] -> []
@@ -199,8 +204,8 @@ let trans_decl (F.RecDecl (proc_name, params, body)) =
         let goto = Goto lbl in
         [subst; goto]
   in
-    let ids = gather_id_from_exp body in
-    let delta = make_delta params ids proc_name in
+    let ids = gather_id_from_exp body in print_string (" " ^ proc_name ^ ": " ^ string_of_ids ids);
+    let delta = make_delta params ids in
     let instrs = trans_exp body delta 0 0 "dummy" in
     let return i = [Return (Local i)] in
     ProcDecl (proc_name, (List.length ids) + 1, 
