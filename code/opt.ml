@@ -21,7 +21,7 @@ let analyze_cfg anlys cfgs =
 
 (* 各種最適化をここに追加 *)
 
-let opt_copy rc_results = CopyPropagation.propagate_copies rc_results
+let opt_copy rd_results cfgs = CopyPropagation2.propagate_copies rd_results cfgs
 
 let opt_fold rd_results cfgs = ConstantFolding.fold_const rd_results cfgs
 
@@ -36,17 +36,18 @@ let optimize is_disp_cfg nreg vmcode =
     (* CFGを構築 *)
     let cfgs = Cfg.build vmcode in
 
-    (* 到達コピー解析器を生成 *)
-    let rc = ReachableCopy.make cfgs in
-    (* 到達コピー解析を実行 *)
-    let rc_results = analyze_cfg rc cfgs in
+    (* 到達可能定義解析器を生成 *)
+    let rd = ReachableDef.make cfgs in 
+    (* 到達可能定義解析を実行 *)
+    let rd_results = analyze_cfg rd cfgs in
+
     (* 解析結果を表示 *)
     if is_disp_cfg then (
       let string_of_prop stmt side =
-        rc.Dfa.to_str (Dfa.get_property rc_results stmt side) in
+        rd.Dfa.to_str (Dfa.get_property rd_results stmt side) in
       Cfg.display_cfg cfgs (Some string_of_prop));
 
-    let vmcode' = opt_copy rc_results vmcode in
+    let vmcode' = opt_copy rd_results cfgs vmcode in
     let copy_flag = vmcode <> vmcode' in
     
     if copy_flag then
@@ -57,16 +58,16 @@ let optimize is_disp_cfg nreg vmcode =
     let cfgs' = Cfg.build vmcode' in 
   
     (* 到達可能定義解析器を生成 *)
-    let rd = ReachableDef.make cfgs' in 
+    let rd' = ReachableDef.make cfgs' in 
     (* 到達可能定義解析を実行 *)
-    let rd_results = analyze_cfg rd cfgs' in
+    let rd'_results = analyze_cfg rd' cfgs' in
     (* 解析結果を表示 *)
     if is_disp_cfg then (
       let string_of_prop stmt side =
-        rd.Dfa.to_str (Dfa.get_property rd_results stmt side) in
+        rd.Dfa.to_str (Dfa.get_property rd'_results stmt side) in
       Cfg.display_cfg cfgs' (Some string_of_prop));
   
-    let vmcode'' = opt_fold rd_results cfgs' vmcode' in
+    let vmcode'' = opt_fold rd'_results cfgs' vmcode' in
     let fold_flag = vmcode' <> vmcode'' in
    
     if fold_flag then
@@ -96,7 +97,7 @@ let optimize is_disp_cfg nreg vmcode =
     if copy_flag || fold_flag || elim_flag then opt_loop vmcode'''
     else vmcode''' in
 
-  let optimized_vmcode = opt_loop vmcode in 
+  let optimized_vmcode = opt_loop vmcode in
   
   (* CFGを構築 *)
   let cfgs = Cfg.build optimized_vmcode in 

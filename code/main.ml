@@ -18,7 +18,7 @@ let rec compile prompt ichan cont =
   let prog = Parser.toplevel Lexer.main (Lexing.from_channel ichan) in
 
   (* Type check *)
-  let prog' = Ty.ty_exp Environment.empty "" prog in
+  Ty.type_check;
 
   (* Normal form conversion (3章) *)
   let norm = Normal.convert prog in

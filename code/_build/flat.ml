@@ -69,12 +69,12 @@ let string_of_flat prog =
     | IfExp (v, e1, e2) ->
         enclose 1
           ((nest 2
-              (group ((text "if 0 <")
+              ((*group ( *)(text "if 0 <")
                       <+> pr_of_value v
                       <+> text "then"
-                      <|> pr_of_exp 1 e1))) <|>
+                      <|> pr_of_exp 1 e1))(*)*) <|>
            (nest 2
-              (group (text "else" <|> pr_of_exp 1 e2))))
+              ((*group ( *)text "else" <|> pr_of_exp 1 e2)))(*)*)
     | TupleExp vs -> pr_of_values vs
     | ProjExp (v, i) ->
         enclose 2 (pr_of_value v <*> text "." <*> text (string_of_int i))
@@ -84,13 +84,13 @@ let string_of_flat prog =
       CompExp ce -> pr_of_cexp p ce
     | LetExp (id, ce, e) ->
         enclose 1
-          ((nest 2 (group (text "let" <+> text id <+>
-                           text "=" <|> pr_of_cexp 1 ce)))
+          ((nest 2 ((*group ( *)text "let" <+> text id <+>
+                           text "=" <|> pr_of_cexp 1 ce))(*)*)
            <+> text "in" <|> pr_of_exp 1 e)
     | LoopExp (id, ce, e) ->
         enclose 1
-          ((nest 2 (group (text "loop" <+> text id <+>
-                           text "=" <|> pr_of_cexp 1 ce)))
+          ((nest 2 ((*group ( *)text "loop" <+> text id <+>
+                           text "=" <|> pr_of_cexp 1 ce))(*)*)
            <+> text "in" <|> pr_of_exp 1 e)
     | RecurExp v ->
         enclose 3 (text "recur" <+> pr_of_value v)
@@ -103,10 +103,10 @@ let string_of_flat prog =
               List.fold_left (fun t p -> t <*> text "," <+> text p)
                 (text param) params'
         in
-        (group (text "let" <+> text "rec" <+>
-                (group
-                   ((text id) <+> text "(" <*> tparms <*> text ")" <+>
-                    nest 2 (text "=" <|> pr_of_exp 1 body)))))
+        ((*group ( *)text "let" <+> text "rec" <+>
+                ((*group
+                   ( *)(text id) <+> text "(" <*> tparms <*> text ")" <+>
+                    nest 2 (text "=" <|> pr_of_exp 1 body)))(*))*)
   in
   layout
     (pretty 30 (List.fold_right (fun decl doc ->

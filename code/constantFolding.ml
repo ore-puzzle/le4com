@@ -67,12 +67,7 @@ let fold defs cfg instr =
             let stmt2 = cfg.(b_idx2).stmts.(s_idx2) in
            (match stmt1, stmt2 with
               Move (_, IntV i1), Move (_, IntV i2) ->
-                let computed_value =
-                  match binOp with
-                    Plus ->  i1 + i2
-                  | Mult -> i1 * i2
-                  | Lt -> if i1 < i2 then 1 else 0 in
-                Move (id, IntV computed_value)
+                BinOp (id, binOp, IntV i1, IntV i2)
             | Move (_, IntV i1), BinOp (_, binOp2, op21, op22) ->
                (match op21, op22 with
                   IntV i, _ ->
@@ -138,7 +133,16 @@ let fold defs cfg instr =
                 | _, _ -> BinOp (id, binOp, op1, op2))
             | _, Move (_, IntV i) -> BinOp (id, binOp, op1, IntV i)
             | _, _ -> BinOp (id, binOp, op1, op2))
-        | _, _ -> BinOp (id, binOp, op1, op2) in
+        | _, _ -> 
+           (match op1, op2 with
+              IntV i1, IntV i2 ->
+                let computed_value =
+                    match binOp with
+                      Plus ->  i1 + i2
+                    | Mult -> i1 * i2
+                    | Lt -> if i1 < i2 then 1 else 0 in
+                  Move (id, IntV computed_value)
+            | _, _ -> BinOp (id, binOp, op1, op2)) in
       update cfg instr result;
       result  
       (*let op1' =

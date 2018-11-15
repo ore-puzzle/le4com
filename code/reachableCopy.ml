@@ -12,15 +12,32 @@ let cfg = ref [||]
 
 let preds_exits = ref MyMap.empty
 
+(* ==== for debug ==== *)
+
+let string_of_prop (ofs, op) =
+  (Vm.string_of_operand (Local ofs)) ^ " = " ^ (Vm.string_of_operand op) 
+
+let string_of_props vs =
+  String.concat ", "
+    (List.sort String.compare
+       (List.map string_of_prop
+          (List.filter (fun v -> v <> dummy) (Set.to_list vs))))
 
 let rec string_of_preds_exits = function
     [] -> ""
-  | (stmt, prop) :: rest -> string_of_instr " " "\t" stmt ^ "; " ^ string_of_preds_exits rest
+  | (stmt, prop) :: rest -> "(" ^ string_of_instr " " "\t" stmt ^ ", " ^ "\t" ^ string_of_props prop ^ ")" ^ "; " ^ "\n" ^ string_of_preds_exits rest
 
 let rec string_of_stmts = function
     [] -> ""
   | head :: rest -> string_of_instr " " "\t" head ^ "; " ^ string_of_stmts rest
 
+let string_of_stmt_stmts stmt stmts =
+  "(" ^ string_of_instr " " "\t" stmt ^ ", " ^ "[" ^ string_of_stmts stmts ^ "]" ^ ")"
+
+let string_of_stmt_index stmt bidx sidx =
+  "(" ^ string_of_instr " " "\t" stmt ^ ", " ^ "(" ^ string_of_int bidx ^ ", " ^ string_of_int sidx ^ "))" 
+
+(* ==== *)
 
 let compare left right =
   if Set.is_empty (Set.diff left right) then
@@ -53,6 +70,12 @@ let lub old_entry_prop prop stmt =
       else if s_index' < s_index then true
       else false) pred in
   let pred_exit_prop = make_pred_exit_prop not_recur_pred in
+ (* print_string (string_of_preds_exits (List.rev (MyMap.to_list !preds_exits)));
+  print_newline();
+  print_newline();*)
+  print_string (string_of_stmt_stmts stmt (preds !cfg stmt));
+  print_newline();
+  print_newline();
   Set.union (Set.singleton dummy) (multi_intersection pred_exit_prop)
     
   

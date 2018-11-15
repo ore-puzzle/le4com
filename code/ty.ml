@@ -12,6 +12,8 @@ type ty =
 
 type subst = (tyvar * ty) list
 
+let err s = raise (Error s)
+
 let alphabet_of_0to25 i = 
   if i >= 0 && i <= 25 then Char.escaped (char_of_int (i + 97))
   else "error"
@@ -199,3 +201,5 @@ let rec ty_exp tyenv loop_id = function
           else if i = 2 then (s, subst_type s ty2)
           else err "Error: only permit <v>.1 or <v>.2"
       | _ -> err "Type Error: projection can apply to tuple")
+
+let type_check exp = ty_exp Environment.empty ""; ()

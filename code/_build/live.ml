@@ -15,7 +15,7 @@ let compare left right =
   else
     (if Set.is_empty (Set.diff right left) then GT else NO)
 
-let lub old_entry_prop prop stmt = Set.union old_entry_prop prop
+let lub = Set.union
 
 let string_of_vars vs =
   String.concat ", "
