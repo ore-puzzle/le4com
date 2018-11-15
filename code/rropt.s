@@ -132,9 +132,8 @@ LL_b__f5_5:
 	b	L_b__f5_4
 	b	L_b__f5_6
 L_b__f5_5:
-	mov	v1, v3
 L_b__f5_6:
-	mov	a1, v1
+	mov	a1, v3
 	b	_b__f5_ret
 _b__f5_ret:
 	add	sp, fp, #4
@@ -160,8 +159,7 @@ _b__f1:
 	str	a3, [v2, #0]
 	str	a2, [v2, #4]
 	str	v1, [v2, #8]
-	mov	v1, v2
-	mov	a1, v1
+	mov	a1, v2
 	b	_b__f1_ret
 _b__f1_ret:
 	add	sp, fp, #4
@@ -245,8 +243,7 @@ _b__f2:
 	str	v2, [v4, #8]
 	str	a2, [v4, #12]
 	str	v3, [v4, #16]
-	mov	v1, v4
-	mov	a1, v1
+	mov	a1, v4
 	b	_b__f2_ret
 _b__f2_ret:
 	add	sp, fp, #4
@@ -310,7 +307,6 @@ LL_b__f3_8:
 LL_b__f3_9:
 	cmp	v1, #0
 	bne	L_b__f3_11
-	ldr	v1, [fp, #-12]
 	b	L_b__f3_12
 L_b__f3_11:
 	mov	a4, #17
@@ -483,7 +479,8 @@ L_b__f3_11:
 	mov	v2, v1
 	b	L_b__f3_10
 L_b__f3_12:
-	mov	a1, v1
+	ldr	ip, [fp, #-12]
+	mov	a1, ip
 	b	_b__f3_ret
 _b__f3_ret:
 	add	sp, fp, #4
@@ -501,12 +498,11 @@ _toplevel:
 	str	a2, [sp, #4]
 	mov	a1, #1
 	bl	mymalloc
-	mov	v1, a1
+	mov	v3, a1
 	ldr	a1, [sp, #0]
 	ldr	a2, [sp, #4]
 	ldr	a3, =_b__f0
-	str	a3, [v1, #0]
-	mov	v5, v1
+	str	a3, [v3, #0]
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
 	mov	a1, #1
@@ -526,37 +522,32 @@ _toplevel:
 	ldr	a3, =_b__f1
 	str	a3, [v2, #0]
 	str	v1, [v2, #4]
-	mov	v1, v2
-	mov	v2, #3
-	mov	a3, #100
-	mov	a4, #10
-	mul	v3, a3, a4
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
 	mov	a1, #4
 	bl	mymalloc
-	mov	v4, a1
+	mov	v1, a1
 	ldr	a1, [sp, #0]
 	ldr	a2, [sp, #4]
 	ldr	a3, =_b__f2
-	str	a3, [v4, #0]
-	str	v2, [v4, #4]
-	str	v3, [v4, #8]
-	str	v1, [v4, #12]
-	mov	v1, v4
-	ldr	v2, [v1, #0]
-	str	v5, [fp, #-8]
+	str	a3, [v1, #0]
+	mov	a3, #3
+	str	a3, [v1, #4]
+	mov	a3, #1000
+	str	a3, [v1, #8]
+	str	v2, [v1, #12]
+	str	v3, [fp, #-8]
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
 	mov	a1, v1
 	mov	a2, #3
-	blx	v2
+	bl	_b__f2
 	mov	v1, a1
 	ldr	a1, [sp, #0]
 	ldr	a2, [sp, #4]
-	ldr	v5, [fp, #-8]
+	ldr	v3, [fp, #-8]
 	ldr	v2, [v1, #0]
-	str	v5, [fp, #-8]
+	str	v3, [fp, #-8]
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
 	mov	a1, v1
@@ -565,13 +556,12 @@ _toplevel:
 	mov	v1, a1
 	ldr	a1, [sp, #0]
 	ldr	a2, [sp, #4]
-	ldr	v5, [fp, #-8]
-	ldr	v2, [v5, #0]
+	ldr	v3, [fp, #-8]
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
-	mov	a1, v5
+	mov	a1, v3
 	mov	a2, v1
-	blx	v2
+	bl	_b__f0
 	mov	v1, a1
 	ldr	a1, [sp, #0]
 	ldr	a2, [sp, #4]

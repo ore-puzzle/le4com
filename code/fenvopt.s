@@ -84,8 +84,7 @@ _b__f1:
 	str	a3, [v2, #0]
 	str	v1, [v2, #4]
 	str	a2, [v2, #8]
-	mov	v1, v2
-	mov	a1, v1
+	mov	a1, v2
 	b	_b__f1_ret
 _b__f1_ret:
 	add	sp, fp, #4
@@ -113,8 +112,7 @@ _b__f8:
 	str	v1, [v3, #4]
 	str	a2, [v3, #8]
 	str	v2, [v3, #12]
-	mov	v1, v3
-	mov	a1, v1
+	mov	a1, v3
 	b	_b__f8_ret
 _b__f8_ret:
 	add	sp, fp, #4
@@ -144,8 +142,7 @@ _b__f9:
 	str	v2, [v4, #8]
 	str	a2, [v4, #12]
 	str	v3, [v4, #16]
-	mov	v1, v4
-	mov	a1, v1
+	mov	a1, v4
 	b	_b__f9_ret
 _b__f9_ret:
 	add	sp, fp, #4
@@ -263,8 +260,7 @@ _b__f3:
 	str	lr, [sp, #-8]
 	sub	fp, sp, #4
 	sub	sp, sp, #16
-	mov	v1, #-1
-	mov	a1, v1
+	mov	a1, #-1
 	b	_b__f3_ret
 _b__f3_ret:
 	add	sp, fp, #4
@@ -470,17 +466,17 @@ _toplevel:
 	str	fp, [sp, #-4]
 	str	lr, [sp, #-8]
 	sub	fp, sp, #4
-	sub	sp, sp, #56
+	sub	sp, sp, #52
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
 	mov	a1, #1
 	bl	mymalloc
-	mov	v1, a1
+	str	a1, [fp, #-28]
 	ldr	a1, [sp, #0]
 	ldr	a2, [sp, #4]
-	ldr	a3, =_b__f0
-	str	a3, [v1, #0]
-	str	v1, [fp, #-28]
+	ldr	a3, [fp, #-28]
+	ldr	a4, =_b__f0
+	str	a4, [a3, #0]
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
 	mov	a1, #2
@@ -492,120 +488,105 @@ _toplevel:
 	str	a3, [v1, #0]
 	ldr	ip, [fp, #-28]
 	str	ip, [v1, #4]
-	mov	v3, v1
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
 	mov	a1, #1
 	bl	mymalloc
-	mov	v1, a1
+	str	a1, [fp, #-16]
 	ldr	a1, [sp, #0]
 	ldr	a2, [sp, #4]
-	ldr	a3, =_b__f2
-	str	a3, [v1, #0]
-	str	v1, [fp, #-20]
+	ldr	a3, [fp, #-16]
+	ldr	a4, =_b__f2
+	str	a4, [a3, #0]
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
 	mov	a1, #1
-	bl	mymalloc
-	mov	v1, a1
-	ldr	a1, [sp, #0]
-	ldr	a2, [sp, #4]
-	ldr	a3, =_b__f3
-	str	a3, [v1, #0]
-	mov	v2, v1
-	mov	v1, #-1
-	str	a1, [sp, #0]
-	str	a2, [sp, #4]
-	mov	a1, #1
-	bl	mymalloc
-	mov	v1, a1
-	ldr	a1, [sp, #0]
-	ldr	a2, [sp, #4]
-	ldr	a3, =_b__f4
-	str	a3, [v1, #0]
-	str	v1, [fp, #-16]
-	str	a1, [sp, #0]
-	str	a2, [sp, #4]
-	mov	a1, #1
-	bl	mymalloc
-	mov	v1, a1
-	ldr	a1, [sp, #0]
-	ldr	a2, [sp, #4]
-	ldr	a3, =_b__f5
-	str	a3, [v1, #0]
-	str	v1, [fp, #-12]
-	str	a1, [sp, #0]
-	str	a2, [sp, #4]
-	mov	a1, #5
-	bl	mymalloc
-	mov	v1, a1
-	ldr	a1, [sp, #0]
-	ldr	a2, [sp, #4]
-	ldr	a3, =_b__f6
-	str	a3, [v1, #0]
-	str	v2, [v1, #4]
-	ldr	ip, [fp, #-12]
-	str	ip, [v1, #8]
-	ldr	ip, [fp, #-16]
-	str	ip, [v1, #12]
-	str	v3, [v1, #16]
-	mov	ip, #128
-	str	ip, [fp, #-24]
-	ldr	v2, [v1, #0]
-	ldr	ip, [fp, #-24]
-	str	a1, [sp, #0]
-	str	a2, [sp, #4]
-	mov	a1, v1
-	mov	a2, ip
-	blx	v2
-	mov	v7, a1
-	ldr	a1, [sp, #0]
-	ldr	a2, [sp, #4]
-	mov	a3, #100
-	mov	a4, #5
-	mul	v1, a3, a4
-	add	v1, v1, #99
-	str	a1, [sp, #0]
-	str	a2, [sp, #4]
-	mov	a1, #2
 	bl	mymalloc
 	mov	v2, a1
 	ldr	a1, [sp, #0]
 	ldr	a2, [sp, #4]
-	mov	a3, #1
+	ldr	a3, =_b__f3
 	str	a3, [v2, #0]
-	str	v1, [v2, #4]
+	str	a1, [sp, #0]
+	str	a2, [sp, #4]
+	mov	a1, #1
+	bl	mymalloc
+	str	a1, [fp, #-20]
+	ldr	a1, [sp, #0]
+	ldr	a2, [sp, #4]
+	ldr	a3, [fp, #-20]
+	ldr	a4, =_b__f4
+	str	a4, [a3, #0]
+	str	a1, [sp, #0]
+	str	a2, [sp, #4]
+	mov	a1, #1
+	bl	mymalloc
+	str	a1, [fp, #-24]
+	ldr	a1, [sp, #0]
+	ldr	a2, [sp, #4]
+	ldr	a3, [fp, #-24]
+	ldr	a4, =_b__f5
+	str	a4, [a3, #0]
+	str	a1, [sp, #0]
+	str	a2, [sp, #4]
+	mov	a1, #5
+	bl	mymalloc
+	mov	v3, a1
+	ldr	a1, [sp, #0]
+	ldr	a2, [sp, #4]
+	ldr	a3, =_b__f6
+	str	a3, [v3, #0]
+	str	v2, [v3, #4]
+	ldr	ip, [fp, #-24]
+	str	ip, [v3, #8]
+	ldr	ip, [fp, #-20]
+	str	ip, [v3, #12]
+	str	v1, [v3, #16]
+	str	a1, [sp, #0]
+	str	a2, [sp, #4]
+	mov	a1, v3
+	mov	a2, #128
+	bl	_b__f6
+	str	a1, [fp, #-12]
+	ldr	a1, [sp, #0]
+	ldr	a2, [sp, #4]
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
 	mov	a1, #2
 	bl	mymalloc
-	mov	v6, a1
-	ldr	a1, [sp, #0]
-	ldr	a2, [sp, #4]
-	mov	a3, #0
-	str	a3, [v6, #0]
-	str	v2, [v6, #4]
-L_toplevel_9:
-	ldr	ip, [fp, #-12]
-	ldr	v4, [ip, #0]
-	str	v6, [fp, #-32]
-	str	v7, [fp, #-36]
-	ldr	ip, [fp, #-12]
-	str	a1, [sp, #0]
-	str	a2, [sp, #4]
-	mov	a1, ip
-	mov	a2, v6
-	blx	v4
 	mov	v1, a1
 	ldr	a1, [sp, #0]
 	ldr	a2, [sp, #4]
-	ldr	v6, [fp, #-32]
-	ldr	v7, [fp, #-36]
-	ldr	ip, [fp, #-16]
-	ldr	v2, [ip, #0]
-	str	v6, [fp, #-32]
-	str	v7, [fp, #-36]
-	ldr	ip, [fp, #-16]
+	mov	a3, #1
+	str	a3, [v1, #0]
+	mov	a3, #599
+	str	a3, [v1, #4]
+	str	a1, [sp, #0]
+	str	a2, [sp, #4]
+	mov	a1, #2
+	bl	mymalloc
+	mov	v7, a1
+	ldr	a1, [sp, #0]
+	ldr	a2, [sp, #4]
+	mov	a3, #0
+	str	a3, [v7, #0]
+	str	v1, [v7, #4]
+L_toplevel_9:
+	ldr	v5, =_b__f5
+	str	v7, [fp, #-32]
+	ldr	ip, [fp, #-24]
+	str	a1, [sp, #0]
+	str	a2, [sp, #4]
+	mov	a1, ip
+	mov	a2, v7
+	blx	v5
+	mov	v1, a1
+	ldr	a1, [sp, #0]
+	ldr	a2, [sp, #4]
+	ldr	v7, [fp, #-32]
+	ldr	v2, =_b__f4
+	str	v7, [fp, #-32]
+	ldr	ip, [fp, #-20]
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
 	mov	a1, ip
@@ -614,10 +595,9 @@ L_toplevel_9:
 	mov	v1, a1
 	ldr	a1, [sp, #0]
 	ldr	a2, [sp, #4]
-	ldr	v6, [fp, #-32]
-	ldr	v7, [fp, #-36]
-	ldr	ip, [fp, #-24]
-	cmp	ip, v1
+	ldr	v7, [fp, #-32]
+	mov	a3, #128
+	cmp	a3, v1
 	blt	LL_toplevel_6
 	mov	v1, #0
 	b	LL_toplevel_7
@@ -626,64 +606,53 @@ LL_toplevel_6:
 LL_toplevel_7:
 	cmp	v1, #0
 	bne	L_toplevel_10
-	ldr	ip, [fp, #-16]
-	ldr	v2, [ip, #0]
-	str	v6, [fp, #-32]
-	str	v7, [fp, #-36]
-	ldr	ip, [fp, #-16]
-	str	a1, [sp, #0]
-	str	a2, [sp, #4]
-	mov	a1, ip
-	mov	a2, v6
-	blx	v2
-	mov	v5, a1
-	ldr	a1, [sp, #0]
-	ldr	a2, [sp, #4]
-	ldr	v6, [fp, #-32]
-	ldr	v7, [fp, #-36]
-	ldr	ip, [fp, #-20]
-	ldr	v1, [ip, #0]
+	ldr	v2, =_b__f4
 	str	v7, [fp, #-32]
-	str	v6, [fp, #-36]
-	str	v5, [fp, #-40]
 	ldr	ip, [fp, #-20]
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
 	mov	a1, ip
 	mov	a2, v7
-	blx	v1
+	blx	v2
+	mov	v4, a1
+	ldr	a1, [sp, #0]
+	ldr	a2, [sp, #4]
+	ldr	v7, [fp, #-32]
+	str	v7, [fp, #-32]
+	str	v4, [fp, #-36]
+	ldr	ip, [fp, #-16]
+	ldr	v1, [fp, #-12]
+	str	a1, [sp, #0]
+	str	a2, [sp, #4]
+	mov	a1, ip
+	mov	a2, v1
+	bl	_b__f2
 	mov	v3, a1
 	ldr	a1, [sp, #0]
 	ldr	a2, [sp, #4]
 	ldr	v7, [fp, #-32]
-	ldr	v6, [fp, #-36]
-	ldr	v5, [fp, #-40]
-	ldr	ip, [fp, #-12]
-	ldr	v4, [ip, #0]
+	ldr	v4, [fp, #-36]
+	ldr	v5, =_b__f5
 	str	v7, [fp, #-32]
-	str	v6, [fp, #-36]
-	str	v5, [fp, #-40]
-	str	v3, [fp, #-44]
-	ldr	ip, [fp, #-12]
+	str	v4, [fp, #-36]
+	str	v3, [fp, #-40]
+	ldr	ip, [fp, #-24]
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
 	mov	a1, ip
-	mov	a2, v6
-	blx	v4
+	mov	a2, v7
+	blx	v5
 	mov	v1, a1
 	ldr	a1, [sp, #0]
 	ldr	a2, [sp, #4]
 	ldr	v7, [fp, #-32]
-	ldr	v6, [fp, #-36]
-	ldr	v5, [fp, #-40]
-	ldr	v3, [fp, #-44]
-	ldr	ip, [fp, #-16]
-	ldr	v2, [ip, #0]
+	ldr	v4, [fp, #-36]
+	ldr	v3, [fp, #-40]
+	ldr	v2, =_b__f4
 	str	v7, [fp, #-32]
-	str	v6, [fp, #-36]
-	str	v5, [fp, #-40]
-	str	v3, [fp, #-44]
-	ldr	ip, [fp, #-16]
+	str	v4, [fp, #-36]
+	str	v3, [fp, #-40]
+	ldr	ip, [fp, #-20]
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
 	mov	a1, ip
@@ -693,13 +662,11 @@ LL_toplevel_7:
 	ldr	a1, [sp, #0]
 	ldr	a2, [sp, #4]
 	ldr	v7, [fp, #-32]
-	ldr	v6, [fp, #-36]
-	ldr	v5, [fp, #-40]
-	ldr	v3, [fp, #-44]
+	ldr	v4, [fp, #-36]
+	ldr	v3, [fp, #-40]
 	ldr	v2, [v3, #0]
 	str	v7, [fp, #-32]
-	str	v6, [fp, #-36]
-	str	v5, [fp, #-40]
+	str	v4, [fp, #-36]
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
 	mov	a1, v3
@@ -709,32 +676,26 @@ LL_toplevel_7:
 	ldr	a1, [sp, #0]
 	ldr	a2, [sp, #4]
 	ldr	v7, [fp, #-32]
-	ldr	v6, [fp, #-36]
-	ldr	v5, [fp, #-40]
-	add	v5, v5, v1
-	ldr	ip, [fp, #-12]
-	ldr	v4, [ip, #0]
-	str	v7, [fp, #-32]
-	str	v5, [fp, #-36]
-	str	v6, [fp, #-40]
-	ldr	ip, [fp, #-12]
+	ldr	v4, [fp, #-36]
+	add	v6, v4, v1
+	ldr	v5, =_b__f5
+	str	v6, [fp, #-32]
+	str	v7, [fp, #-36]
+	ldr	ip, [fp, #-24]
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
 	mov	a1, ip
-	mov	a2, v6
-	blx	v4
+	mov	a2, v7
+	blx	v5
 	mov	v1, a1
 	ldr	a1, [sp, #0]
 	ldr	a2, [sp, #4]
-	ldr	v7, [fp, #-32]
-	ldr	v5, [fp, #-36]
-	ldr	v6, [fp, #-40]
-	ldr	ip, [fp, #-16]
-	ldr	v2, [ip, #0]
-	str	v7, [fp, #-32]
-	str	v5, [fp, #-36]
-	str	v6, [fp, #-40]
-	ldr	ip, [fp, #-16]
+	ldr	v6, [fp, #-32]
+	ldr	v7, [fp, #-36]
+	ldr	v2, =_b__f4
+	str	v6, [fp, #-32]
+	str	v7, [fp, #-36]
+	ldr	ip, [fp, #-20]
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
 	mov	a1, ip
@@ -743,44 +704,37 @@ LL_toplevel_7:
 	mov	v1, a1
 	ldr	a1, [sp, #0]
 	ldr	a2, [sp, #4]
-	ldr	v7, [fp, #-32]
-	ldr	v5, [fp, #-36]
-	ldr	v6, [fp, #-40]
+	ldr	v6, [fp, #-32]
+	ldr	v7, [fp, #-36]
 	add	v3, v1, #1
-	ldr	ip, [fp, #-12]
-	ldr	v4, [ip, #0]
-	str	v7, [fp, #-32]
-	str	v5, [fp, #-36]
-	str	v3, [fp, #-40]
-	ldr	ip, [fp, #-12]
+	ldr	v5, =_b__f5
+	str	v6, [fp, #-32]
+	str	v3, [fp, #-36]
+	ldr	ip, [fp, #-24]
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
 	mov	a1, ip
-	mov	a2, v6
-	blx	v4
+	mov	a2, v7
+	blx	v5
 	mov	v1, a1
 	ldr	a1, [sp, #0]
 	ldr	a2, [sp, #4]
-	ldr	v7, [fp, #-32]
-	ldr	v5, [fp, #-36]
-	ldr	v3, [fp, #-40]
-	ldr	ip, [fp, #-12]
-	ldr	v4, [ip, #0]
-	str	v7, [fp, #-32]
-	str	v5, [fp, #-36]
-	str	v3, [fp, #-40]
-	ldr	ip, [fp, #-12]
+	ldr	v6, [fp, #-32]
+	ldr	v3, [fp, #-36]
+	ldr	v5, =_b__f5
+	str	v6, [fp, #-32]
+	str	v3, [fp, #-36]
+	ldr	ip, [fp, #-24]
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
 	mov	a1, ip
 	mov	a2, v1
-	blx	v4
+	blx	v5
 	mov	v1, a1
 	ldr	a1, [sp, #0]
 	ldr	a2, [sp, #4]
-	ldr	v7, [fp, #-32]
-	ldr	v5, [fp, #-36]
-	ldr	v3, [fp, #-40]
+	ldr	v6, [fp, #-32]
+	ldr	v3, [fp, #-36]
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
 	mov	a1, #2
@@ -797,42 +751,36 @@ LL_toplevel_7:
 	mov	v1, a1
 	ldr	a1, [sp, #0]
 	ldr	a2, [sp, #4]
-	str	v5, [v1, #0]
+	str	v6, [v1, #0]
 	str	v2, [v1, #4]
-	mov	v6, v1
+	mov	v7, v1
 	b	L_toplevel_9
 	b	L_toplevel_11
 L_toplevel_10:
-	ldr	ip, [fp, #-12]
-	ldr	v4, [ip, #0]
+	ldr	v5, =_b__f5
 	str	v7, [fp, #-32]
-	str	v6, [fp, #-36]
-	ldr	ip, [fp, #-12]
+	ldr	ip, [fp, #-24]
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
 	mov	a1, ip
-	mov	a2, v6
-	blx	v4
+	mov	a2, v7
+	blx	v5
 	mov	v1, a1
 	ldr	a1, [sp, #0]
 	ldr	a2, [sp, #4]
 	ldr	v7, [fp, #-32]
-	ldr	v6, [fp, #-36]
-	ldr	ip, [fp, #-12]
-	ldr	v4, [ip, #0]
+	ldr	v5, =_b__f5
 	str	v7, [fp, #-32]
-	str	v6, [fp, #-36]
-	ldr	ip, [fp, #-12]
+	ldr	ip, [fp, #-24]
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
 	mov	a1, ip
 	mov	a2, v1
-	blx	v4
+	blx	v5
 	mov	v1, a1
 	ldr	a1, [sp, #0]
 	ldr	a2, [sp, #4]
 	ldr	v7, [fp, #-32]
-	ldr	v6, [fp, #-36]
 	cmp	v1, #1
 	blt	LL_toplevel_8
 	mov	v1, #0
@@ -842,51 +790,42 @@ LL_toplevel_8:
 LL_toplevel_9:
 	cmp	v1, #0
 	bne	L_toplevel_12
-	ldr	ip, [fp, #-16]
-	ldr	v2, [ip, #0]
+	ldr	v2, =_b__f4
 	str	v7, [fp, #-32]
-	str	v6, [fp, #-36]
-	ldr	ip, [fp, #-16]
+	ldr	ip, [fp, #-20]
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
 	mov	a1, ip
-	mov	a2, v6
+	mov	a2, v7
 	blx	v2
 	mov	v3, a1
 	ldr	a1, [sp, #0]
 	ldr	a2, [sp, #4]
 	ldr	v7, [fp, #-32]
-	ldr	v6, [fp, #-36]
-	ldr	ip, [fp, #-12]
-	ldr	v4, [ip, #0]
-	str	v7, [fp, #-32]
-	str	v3, [fp, #-36]
-	ldr	ip, [fp, #-12]
+	ldr	v5, =_b__f5
+	str	v3, [fp, #-32]
+	ldr	ip, [fp, #-24]
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
 	mov	a1, ip
-	mov	a2, v6
-	blx	v4
+	mov	a2, v7
+	blx	v5
 	mov	v1, a1
 	ldr	a1, [sp, #0]
 	ldr	a2, [sp, #4]
-	ldr	v7, [fp, #-32]
-	ldr	v3, [fp, #-36]
-	ldr	ip, [fp, #-12]
-	ldr	v4, [ip, #0]
-	str	v7, [fp, #-32]
-	str	v3, [fp, #-36]
-	ldr	ip, [fp, #-12]
+	ldr	v3, [fp, #-32]
+	ldr	v5, =_b__f5
+	str	v3, [fp, #-32]
+	ldr	ip, [fp, #-24]
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
 	mov	a1, ip
 	mov	a2, v1
-	blx	v4
+	blx	v5
 	mov	v1, a1
 	ldr	a1, [sp, #0]
 	ldr	a2, [sp, #4]
-	ldr	v7, [fp, #-32]
-	ldr	v3, [fp, #-36]
+	ldr	v3, [fp, #-32]
 	add	v1, v1, #-1
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
@@ -907,17 +846,16 @@ LL_toplevel_9:
 	ldr	a2, [sp, #4]
 	str	v3, [v1, #0]
 	str	v2, [v1, #4]
-	mov	v6, v1
+	mov	v7, v1
 	b	L_toplevel_9
 	b	L_toplevel_13
 L_toplevel_12:
-	ldr	ip, [fp, #-16]
-	ldr	v2, [ip, #0]
-	ldr	ip, [fp, #-16]
+	ldr	v2, =_b__f4
+	ldr	ip, [fp, #-20]
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
 	mov	a1, ip
-	mov	a2, v6
+	mov	a2, v7
 	blx	v2
 	mov	v1, a1
 	ldr	a1, [sp, #0]
@@ -925,32 +863,19 @@ L_toplevel_12:
 L_toplevel_13:
 L_toplevel_11:
 	ldr	ip, [fp, #-28]
-	ldr	v2, [ip, #0]
-	ldr	ip, [fp, #-28]
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
 	mov	a1, ip
 	mov	a2, v1
-	blx	v2
-	mov	v3, a1
+	bl	_b__f0
+	mov	v1, a1
 	ldr	a1, [sp, #0]
 	ldr	a2, [sp, #4]
-	ldr	ip, [fp, #-24]
-	mov	a4, #100
-	mul	v1, ip, a4
-	ldr	ip, [fp, #-24]
-	add	v2, ip, #1
-	mul	v2, v1, v2
-	ldr	ip, [fp, #-24]
-	mov	a4, #2
-	mul	v1, ip, a4
-	add	v1, v1, #1
-	mul	v1, v2, v1
-	ldr	v2, [v3, #0]
+	ldr	v2, [v1, #0]
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
-	mov	a1, v3
-	mov	a2, v1
+	mov	a1, v1
+	mov	a2, #424358400
 	blx	v2
 	mov	v1, a1
 	ldr	a1, [sp, #0]
