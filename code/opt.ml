@@ -97,7 +97,7 @@ let optimize is_disp_cfg nreg vmcode =
     if copy_flag || fold_flag || elim_flag then opt_loop vmcode'''
     else vmcode''' in
 
-  (*let optimized_vmcode = opt_loop vmcode in*) let optimized_vmcode = vmcode in
+  let optimized_vmcode = opt_loop vmcode in
   
   (* CFGを構築 *)
   let cfgs = Cfg.build optimized_vmcode in 
