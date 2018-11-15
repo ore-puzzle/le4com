@@ -121,7 +121,8 @@ _b_map:
 	str	a2, [v5, #16]
 	str	a1, [v5, #20]
 	str	v4, [v5, #24]
-	mov	a1, v5
+	mov	v1, v5
+	mov	a1, v1
 	b	_b_map_ret
 _b_map_ret:
 	add	sp, fp, #4
@@ -290,7 +291,8 @@ _b__f3:
 	str	a2, [v5, #12]
 	str	v3, [v5, #16]
 	str	v4, [v5, #20]
-	mov	a1, v5
+	mov	v1, v5
+	mov	a1, v1
 	b	_b__f3_ret
 _b__f3_ret:
 	add	sp, fp, #4
@@ -324,7 +326,8 @@ _b__f7:
 	str	v4, [v6, #16]
 	str	v5, [v6, #20]
 	str	a2, [v6, #24]
-	mov	a1, v6
+	mov	v1, v6
+	mov	a1, v1
 	b	_b__f7_ret
 _b__f7_ret:
 	add	sp, fp, #4
@@ -358,11 +361,12 @@ _b__f8:
 	str	v3, [v7, #12]
 	str	v4, [v7, #16]
 	str	v5, [v7, #20]
+	ldr	v1, [v7, #0]
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
 	mov	a1, v7
 	mov	a2, v6
-	bl	_b_red
+	blx	v1
 	mov	v1, a1
 	ldr	a1, [sp, #0]
 	ldr	a2, [sp, #4]
@@ -409,7 +413,8 @@ _b_red:
 	str	v4, [v6, #20]
 	str	a1, [v6, #24]
 	str	v5, [v6, #28]
-	mov	a1, v6
+	mov	v1, v6
+	mov	a1, v1
 	b	_b_red_ret
 _b_red_ret:
 	add	sp, fp, #4
@@ -611,12 +616,12 @@ _toplevel:
 	str	a2, [sp, #4]
 	mov	a1, #1
 	bl	mymalloc
-	str	a1, [fp, #-12]
+	mov	v1, a1
 	ldr	a1, [sp, #0]
 	ldr	a2, [sp, #4]
-	ldr	a3, [fp, #-12]
-	ldr	a4, =_b__f0
-	str	a4, [a3, #0]
+	ldr	a3, =_b__f0
+	str	a3, [v1, #0]
+	str	v1, [fp, #-12]
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
 	mov	a1, #1
@@ -626,15 +631,17 @@ _toplevel:
 	ldr	a2, [sp, #4]
 	ldr	a3, =_b__f1
 	str	a3, [v1, #0]
+	mov	v3, v1
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
 	mov	a1, #1
 	bl	mymalloc
-	mov	v2, a1
+	mov	v1, a1
 	ldr	a1, [sp, #0]
 	ldr	a2, [sp, #4]
 	ldr	a3, =_b__f2
-	str	a3, [v2, #0]
+	str	a3, [v1, #0]
+	mov	v4, #-1
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
 	mov	a1, #5
@@ -646,25 +653,24 @@ _toplevel:
 	str	a3, [v7, #0]
 	ldr	ip, [fp, #-12]
 	str	ip, [v7, #4]
-	mov	a3, #-1
-	str	a3, [v7, #8]
-	str	v1, [v7, #12]
-	str	v2, [v7, #16]
+	str	v4, [v7, #8]
+	str	v3, [v7, #12]
+	str	v1, [v7, #16]
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
 	mov	a1, #5
 	bl	mymalloc
-	mov	v5, a1
+	mov	v2, a1
 	ldr	a1, [sp, #0]
 	ldr	a2, [sp, #4]
 	ldr	a3, =_b__f3
-	str	a3, [v5, #0]
+	str	a3, [v2, #0]
 	ldr	ip, [fp, #-12]
-	str	ip, [v5, #4]
-	mov	a3, #-1
-	str	a3, [v5, #8]
-	str	v1, [v5, #12]
-	str	v2, [v5, #16]
+	str	ip, [v2, #4]
+	str	v4, [v2, #8]
+	str	v3, [v2, #12]
+	str	v1, [v2, #16]
+	mov	v5, v2
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
 	mov	a1, #2
@@ -674,8 +680,7 @@ _toplevel:
 	ldr	a2, [sp, #4]
 	mov	a3, #5
 	str	a3, [v1, #0]
-	mov	a3, #-1
-	str	a3, [v1, #4]
+	str	v4, [v1, #4]
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
 	mov	a1, #2
@@ -725,13 +730,14 @@ _toplevel:
 	ldr	a2, [sp, #4]
 	ldr	a3, =_b__f4
 	str	a3, [v1, #0]
+	ldr	v2, [v5, #0]
 	str	v6, [fp, #-12]
 	str	v7, [fp, #-16]
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
 	mov	a1, v5
 	mov	a2, v1
-	bl	_b__f3
+	blx	v2
 	mov	v1, a1
 	ldr	a1, [sp, #0]
 	ldr	a2, [sp, #4]
@@ -759,13 +765,14 @@ _toplevel:
 	ldr	a2, [sp, #4]
 	ldr	a3, =_b__f5
 	str	a3, [v1, #0]
+	ldr	v2, [v7, #0]
 	str	v3, [fp, #-12]
 	str	v6, [fp, #-16]
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
 	mov	a1, v7
 	mov	a2, v1
-	bl	_b_map
+	blx	v2
 	mov	v1, a1
 	ldr	a1, [sp, #0]
 	ldr	a2, [sp, #4]
@@ -792,11 +799,13 @@ _toplevel:
 	ldr	a1, [sp, #0]
 	ldr	a2, [sp, #4]
 	ldr	ip, [fp, #-12]
+	ldr	v2, [ip, #0]
+	ldr	ip, [fp, #-12]
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
 	mov	a1, ip
 	mov	a2, v1
-	bl	_b__f0
+	blx	v2
 	mov	v1, a1
 	ldr	a1, [sp, #0]
 	ldr	a2, [sp, #4]
