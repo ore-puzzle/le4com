@@ -1,1 +1,1 @@
-arm_reg.ml: Arm_spec List Reg Syntax
+arm_reg.ml: Arm_spec List Reg String Syntax

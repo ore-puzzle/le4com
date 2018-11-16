@@ -63,13 +63,32 @@ let fresh_label =
   in
     body
 
+let to_binary_str i =
+  let rec body_loop n mod_list =
+    let quo = n / 2 in
+    let rem = n mod 2 in
+    if quo = 0 then
+      rem :: mod_list
+    else
+      body_loop quo (rem :: mod_list)
+  in
+    List.fold_left (fun x y -> x ^ y) "" (List.map string_of_int (body_loop i []))
+
+let get_max_range bstr =
+  try
+    let left = String.index bstr '1' in
+    let right = String.rindex bstr '1' in
+    right - left + 1
+  with
+    Not_found -> 0
+
 let mov_to_ldr stmt =
   match stmt with
     Instr instr ->
      (match instr with
         Mov (reg, addr) ->
          (match addr with 
-            I i when i > 65535 -> Instr (Ldr (reg, L (string_of_int i)))
+            I i when (get_max_range (to_binary_str i)) > 8 -> Instr (Ldr (reg, L (string_of_int i)))
           | _ -> stmt)
       | _ -> stmt)
   | _ -> stmt
