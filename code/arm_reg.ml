@@ -82,16 +82,26 @@ let get_max_range bstr =
   with
     Not_found -> 0
 
-let mov_to_ldr stmt =
+let imm_to_ldr [stmt] =
   match stmt with
     Instr instr ->
      (match instr with
         Mov (reg, addr) ->
          (match addr with 
-            I i when (get_max_range (to_binary_str i)) > 8 -> Instr (Ldr (reg, L (string_of_int i)))
-          | _ -> stmt)
-      | _ -> stmt)
-  | _ -> stmt
+            I i when (get_max_range (to_binary_str i)) > 8 -> [Instr (Ldr (reg, L (string_of_int i)))]
+          | _ -> [stmt])
+      | Add (reg1, reg2, addr) ->
+         (match addr with
+            I i when (get_max_range (to_binary_str i)) > 8 -> 
+              [Instr (Ldr (A4, L (string_of_int i))); Instr (Add (reg1, reg2, R A4))]
+          | _ -> [stmt])
+      | Cmp (reg, addr) ->
+         (match addr with
+            I i when (get_max_range (to_binary_str i)) > 8 -> 
+              [Instr (Ldr (A4, L (string_of_int i))); Instr (Cmp (reg, R A4))]
+          | _ -> [stmt])
+      | _ -> [stmt])
+  | _ -> [stmt]
 
 (* ==== Regマシンコード --> アセンブリコード ==== *)
 
@@ -109,7 +119,7 @@ let gen_decl (Reg.ProcDecl (name, nlocal, instrs)) =
         let r1 = reg_of rd in
         let (r2, addr, li, intv_other_flag) =
           match op1, op2 with
-            Reg.IntV i1, Reg.IntV i2 -> 
+            Reg.IntV i1, Reg.IntV i2 -> (* 定数畳み込みによりこの場合はあり得ない *)
               (A3, I i2, [Instr (Mov (A3, I i1))], false)
           | Reg.IntV i1, _ -> (reg_of_param_or_reg op2, I i1, [], true)
           | _, Reg.IntV i2 -> (reg_of_param_or_reg op1, I i2, [], false)
@@ -196,7 +206,7 @@ let gen_decl (Reg.ProcDecl (name, nlocal, instrs)) =
             [Instr (Ldr (rd, mem_access r i));
              Instr (Str (rd, local_access ofs))]
   in
-    let instr_list = List.map mov_to_ldr (List.concat (List.map gen_instr instrs)) in
+    let instr_list = List.concat (List.map imm_to_ldr (List.map (fun x -> [x]) (List.concat (List.map gen_instr instrs)))) in
     [Dir (D_align 2);
      Dir (D_global name);
      Label name;

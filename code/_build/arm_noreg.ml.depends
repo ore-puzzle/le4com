@@ -1,1 +1,1 @@
-arm_noreg.ml: Arm_spec List Syntax Vm
+arm_noreg.ml: Arm_spec List String Syntax Vm

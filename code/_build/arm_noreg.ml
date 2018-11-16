@@ -50,6 +50,46 @@ let make_instr_of_malloc a1 ops =
         body_loop (ofs + 1) rest
   in
     body_loop 0 ops
+
+let to_binary_str i =
+  let rec body_loop n mod_list =
+    let quo = n / 2 in
+    let rem = n mod 2 in
+    if quo = 0 then
+      rem :: mod_list
+    else
+      body_loop quo (rem :: mod_list)
+  in
+    List.fold_left (fun x y -> x ^ y) "" (List.map string_of_int (body_loop i []))
+
+let get_max_range bstr =
+  try
+    let left = String.index bstr '1' in
+    let right = String.rindex bstr '1' in
+    right - left + 1
+  with
+    Not_found -> 0
+
+let imm_to_ldr [stmt] =
+  match stmt with
+    Instr instr ->
+     (match instr with
+        Mov (reg, addr) ->
+         (match addr with 
+            I i when (get_max_range (to_binary_str i)) > 8 -> [Instr (Ldr (reg, L (string_of_int i)))]
+          | _ -> [stmt])
+      | Add (reg1, reg2, addr) ->
+         (match addr with
+            I i when (get_max_range (to_binary_str i)) > 8 -> 
+              [Instr (Ldr (A4, L (string_of_int i))); Instr (Add (reg1, reg2, R A4))]
+          | _ -> [stmt])
+      | Cmp (reg, addr) ->
+         (match addr with
+            I i when (get_max_range (to_binary_str i)) > 8 -> 
+              [Instr (Ldr (A4, L (string_of_int i))); Instr (Cmp (reg, R A4))]
+          | _ -> [stmt])
+      | _ -> [stmt])
+  | _ -> [stmt]
          
 
 
@@ -116,7 +156,7 @@ let gen_decl (Vm.ProcDecl (name, nlocal, instrs)) =
         [Instr (Ldr (V1, mem_access V1 i));
          Instr (Str (V1, local_access id))]
   in
-    let instr_list = List.concat (List.map gen_instr instrs) in
+    let instr_list = List.concat (List.map imm_to_ldr (List.map (fun x -> [x]) (List.concat (List.map gen_instr instrs)))) in
     [Dir (D_align 2);
      Dir (D_global name);
      Label name;

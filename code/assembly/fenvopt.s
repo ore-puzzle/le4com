@@ -559,7 +559,7 @@ _toplevel:
 	ldr	a2, [sp, #4]
 	mov	a3, #1
 	str	a3, [v1, #0]
-	mov	a3, #599
+	ldr	a3, =599
 	str	a3, [v1, #4]
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
@@ -875,7 +875,7 @@ L_toplevel_11:
 	str	a1, [sp, #0]
 	str	a2, [sp, #4]
 	mov	a1, v1
-	mov	a2, #424358400
+	ldr	a2, =424358400
 	blx	v2
 	mov	v1, a1
 	ldr	a1, [sp, #0]

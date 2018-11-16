@@ -654,7 +654,7 @@ _toplevel:
 	ldr	a3, =_b__f2
 	str	a3, [v2, #0]
 	str	v1, [v2, #4]
-	mov	a3, #9000
+	ldr	a3, =9000
 	str	a3, [v2, #8]
 	str	v4, [fp, #-8]
 	str	a1, [sp, #0]
