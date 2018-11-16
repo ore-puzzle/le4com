@@ -10,16 +10,20 @@ let bottom = Set.empty
 
 let cfg = ref [||]
 
+
 let compare left right =
   if Set.is_empty (Set.diff left right) then
     (if Set.is_empty (Set.diff right left) then EQ else LT)
   else
     (if Set.is_empty (Set.diff right left) then GT else NO)
 
+
 let lub = Set.union 
+
 
 let string_of_def (ofs, (b_index, s_index)) =
   "(" ^ (Vm.string_of_operand (Local ofs)) ^ ", " ^ (string_of_int b_index) ^ (string_of_int s_index) ^ ")"
+
 
 let string_of_defs (vs: (id * (int * int)) Set.t) =
   String.concat ", "
@@ -27,17 +31,13 @@ let string_of_defs (vs: (id * (int * int)) Set.t) =
        (List.map string_of_def
           (List.filter (fun v -> v <> dummy) (Set.to_list vs))))
 
+(* もらったcfgsからラベルをはがしてcfgのみを取り出す関数 *)
 let rec get_second_list l =
   match l with
     [] -> []
   | (_, head) :: rest -> head :: get_second_list rest    
 
-let rec remove dst = function
-    [] -> []
-  | (dst', _) as head :: rest ->
-      if dst = dst' then rest
-      else head :: (remove dst rest)
-
+(* cfg中のstmtの位置を返す関数 *)
 let location stmt = find_stmt !cfg stmt 
 
 let transfer entry_defs stmt =
@@ -52,7 +52,8 @@ let transfer entry_defs stmt =
            | _ -> Set.empty
          )
       vs in
-  gen entry_defs
+  gen entry_defs (* killはいらない *)
+
 
 let make cfg' = cfg := Array.concat (get_second_list cfg');
 {

@@ -104,9 +104,9 @@ let string_of_reg prog =
   String.concat "\n" (List.map string_of_decl prog)
 
 (* ==== constant ==== *)
-let dummy = -1 
+let dummy = -1 (* 最初に塗られている色 (一部他の使い方） *)
 
-let tmp = 0
+let tmp = 0 (* レジスタを一時的に退避する空間 *)
 
 (* ==== for debug ==== *)
 
@@ -161,7 +161,7 @@ let string_of_int_list_list l =
     "[" ^ body_loop l ^ "]"
 
 (* ==== support function ==== *)
-
+(* 生存変数解析の結果からプロパティを取り出す関数 *)
 let rec get_properties_as_list lives = function
     [] -> []
   | stmt :: rest -> 
@@ -171,38 +171,41 @@ let rec get_properties_as_list lives = function
              (MySet.to_list (Dfa.get_property lives stmt Cfg.AFTER)) ::
               get_properties_as_list lives rest)
 
-
+(* プロパティからParamを取り除いてLocalだけにする関数 *)
 let rec trans_props_from_op_to_ofs = function
     [] -> []
   | prop :: rest ->
       List.map (fun (Vm.Local ofs) -> ofs) 
-               (List.filter 
+               (List.filter                                 (* 解析に使ったdummyもはじく *)
                  (fun op -> match op with Vm.Local ofs when ofs <> -1 -> true | _ -> false) prop) ::
       trans_props_from_op_to_ofs rest
 
-
-
+(* 隣接行列を生成する関数 *)
+(* ofses = リストのリストで、各要素の中に含まれているofsは同時に生存している *)
 let make_adjacency_matrix ofses size instrs =
+  (* すべて0の行列、これを書き換えていく *)
   let matrix = Array.make_matrix size size 0 in
   let rec outer_loop = function
       [] -> ()
     | head :: rest -> inner_loop head; outer_loop rest
-  and inner_loop = function
+  and inner_loop = function (* このリストに含まれているofsは同時に生存している *) 
       [] -> ()
     | head :: rest -> 
-        for i = 0 to (List.length rest) - 1 do
+        for i = 0 to (List.length rest) - 1 do (* headはrestの要素たちと同時に生存している *)
           matrix.(head).(List.nth rest i) <- 1;
-          matrix.(List.nth rest i).(head) <- 1
+          matrix.(List.nth rest i).(head) <- 1  (* 対称行列になる *)
         done;
         inner_loop rest 
+  (* MallocをMallocとAssignに分割するので、そこの干渉もチェック *)
+  (* この干渉は生存変数解析からはわからない(AssignはここRegで初めて現れるため） *)
   and outer_loop_for_asn = function
       [] -> ()
     | Vm.Malloc (id, ops) :: rest -> inner_loop_for_asn id ops; outer_loop_for_asn rest
   and inner_loop_for_asn ofs = function
-      [] -> () (* not done *)
+      [] -> () (* Mallocのopsは空ではあり得ないので実行されない *)
     | head :: rest ->
        (match head with
-          Vm.Local ofs' ->
+          Vm.Local ofs' -> (* Mallocの格納先と格納されるものは同時に生存している *)
             matrix.(ofs).(ofs') <- 1;
             matrix.(ofs').(ofs) <- 1;
             inner_loop_for_asn ofs rest
@@ -212,85 +215,81 @@ let make_adjacency_matrix ofses size instrs =
     outer_loop_for_asn (List.filter (fun instr -> match instr with Vm.Malloc _ -> true | _ -> false) instrs);
     matrix
 
+(* 頂点と色の組を生成する関数 *)
 let rec make_node_color_list node_num =
   match node_num with
     0 -> []
+   (* 最初はすべてdummyで塗られている *)
   | n -> (n-1, dummy) :: make_node_color_list (n-1) 
 
-
+(* 頂点と色の組を、頂点の次数の昇順にソートする関数 *)
 let sort_by_degree node_color adjacency_matrix =
   let f nc1 nc2 =
     let (n1, _) = nc1 in
     let (n2, _) = nc2 in
+    (* 隣接行列の各行の要素の和が次数となる *)
     let degree_of_n1 = Array.fold_left (+) 0 adjacency_matrix.(n1) in
     let degree_of_n2 = Array.fold_left (+) 0 adjacency_matrix.(n2) in
     if degree_of_n1 < degree_of_n2 then -1
     else if degree_of_n1 = degree_of_n2 then 0
     else 1 in
-  List.stable_sort f node_color 
+  List.stable_sort f node_color (* stable_sortにしたのはデバッグのため *)
 
+(* 頂点と色の組から、ある頂点の色を得る関数 *)
 let rec get_color node = function
     [] -> err "no such node"
   | (node', color) :: rest ->
       if node = node' then color
       else get_color node rest
 
+(* リスト中の最大値を返す関数 *)
 let rec get_max max = function
     [] -> max
   | head :: rest -> 
       if max < head then get_max head rest
       else get_max max rest              
 
-
+(* 頂点と色の組において、ある頂点の色を変える関数 *)
 let rec replace (node, color) = function
     [] -> err "no such node"
   | (node', color') :: rest ->
       if node = node' then (node, color) :: rest
       else (node', color') :: replace (node, color) rest
 
-let rop_of_vop map = function
-    Vm.Param i -> Param i
-  | Vm.Local id -> 
-     (match List.assoc id map with
-        R reg -> Reg reg
-      | L ofs -> Reg dummy)
-  | Vm.Proc l -> Proc l
-  | Vm.IntV i -> IntV i
-
-
+(* Vm.operand -> Reg.operand *)
 let rop_of_vop = function
     Vm.Param i -> Param i
   | Vm.Local id -> err "For debug: this line cannot be done"
   | Vm.Proc l -> Proc l
   | Vm.IntV i -> IntV i
 
-let make_assign dest index op map =
-  match op with
-    Vm.Local id ->
-     (match List.assoc id map with
-        R reg -> [Assign (dest, index, Reg reg)]
-      | L ofs -> [Load (reserved_reg, ofs);
-                  Assign (dest, index, Reg reserved_reg)])
-  | _ -> [Assign (dest, index, rop_of_vop op)]
-
-
+(* Assignの命令列を生成する関数 *)
 let make_assigns dest ops map =
+  let make_assign index op =
+    match op with
+      Vm.Local id ->
+       (match List.assoc id map with
+          R reg -> [Assign (dest, index, Reg reg)]
+        | L ofs -> [Load (reserved_reg, ofs);
+                    Assign (dest, index, Reg reserved_reg)])
+    |   _ -> [Assign (dest, index, rop_of_vop op)] in
   let rec body_loop index = function
       [] -> []
-    | head :: rest -> (make_assign dest index head map) :: body_loop (index+1) rest
+    | head :: rest -> (make_assign index head) :: body_loop (index+1) rest
   in
     body_loop 0 ops
 
+(* プロパティ中のofsをマップされているレジスタに変換する関数 *)
 let rec map_property prop map =
   match prop with
     [] -> []
   | Vm.Local id :: rest when id <> -1 -> 
      (match List.assoc id map with
         R reg -> reg :: map_property rest map
-      | L ofs -> map_property rest map)
+      | L ofs -> map_property rest map) (* Lは無視 *)
   | _ :: rest -> map_property rest map
 
-
+(* 関数呼び出しの直後に生きていて、かつその結果を格納したものではないレジスタの数の最大値を得る関数 *)
 let rec get_max_tmp instrs lives map max =
   match instrs with 
     [] -> max
@@ -302,19 +301,17 @@ let rec get_max_tmp instrs lives map max =
       else get_max_tmp rest lives map max
   | _ :: rest -> get_max_tmp rest lives map max
 
-
-      
-
-
+(* 関数呼び出しの際のレジスタの退避/復帰の命令列を生成する関数 *)
 let rec make_escape_recover_instrs index = function
     [] -> ([], [])
   | head :: rest ->
       let (store, load) = make_escape_recover_instrs (index+1) rest in
       (Store (head, index) :: store, Load (head, index) :: load)
 
+(* 使えるレジスタのリストを返す関数 *)
 let make_regs nreg =
   let rec body_loop num =
-    if num = 0 then
+    if num = 0 then (* thenはある程度後のほうで実行されると想定 *)
       [num]
     else
       num :: body_loop (num - 1)

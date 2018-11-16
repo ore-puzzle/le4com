@@ -1,33 +1,36 @@
 open Vm
 open Cfg
 
-
+(* 3値論理 *)
 type tri_bool = T | F | U
 
+(* ifの条件式がtrueかfalseか、あるいはわからないかを判定 *)
+let judge op =
+  match op with
+    IntV i-> if i > 0 then T else F
+  | _ -> U
 
-
+(* プロパティのからopに関する部分のみを取り出す *)
 let get_subset op prop =
   match op with
     Local id ->
       List.filter (fun (dst, _) -> id = dst) prop 
   | _ -> []
 
-let judge op =
-  match op with
-    IntV i-> if i > 0 then T else F
-  | _ -> U
-
+(* BranchIfで合流地点においてあるラベルを得るための関数 *)
+(* そのラベルの作られ方に依存 *)
 let get_another_label l =
   let mark = String.rindex l '_' in
   let same_part = String.sub l 0 (mark + 1) in
   let number = int_of_string (String.sub l (mark + 1) ((String.length l) - (String.length same_part))) in
   same_part ^ string_of_int (number + 1)
 
-
+(* cfgを書き換える *)
 let update cfg old_instr new_instr  =
   let (this_b_idx, this_s_idx) = find_stmt cfg old_instr in
   cfg.(this_b_idx).stmts.(this_s_idx) <- new_instr              
 
+(* opのリストの定数畳み込み *)
 let rec ops_to_ops' cfg prop = function
     [] -> []
   | op :: rest ->
@@ -42,6 +45,10 @@ let rec ops_to_ops' cfg prop = function
         | _ -> op in
       op' :: ops_to_ops' cfg prop rest
 
+(* 定数畳み込みを行う関数 *)
+(* 各オペランドがLocalで、そこに到達している定義が一つで、
+   かつそれがIntVをMoveしているならIntVをMoveするものに置き換える
+   そのときにプロパティも書き換える *)
 let fold defs cfg instr =
   match instr with
     Move (id, op) ->
@@ -56,6 +63,11 @@ let fold defs cfg instr =
               Move (id, IntV i)
           | _ -> instr)                        
       | _ -> instr)
+    (* BinOpは (p1 + 1) + 2 => p1 + 3
+               (p1 * 2) * 3 => p1 * 6
+       のように二つのBinOpが一つのBinOpに置き換えられる場合も置き換える
+       詳しく言うと、一つの変数、二つの即値が同じ演算で並んでいるような場合に置き換える *)
+    (* 一気に畳み込むこともできなくはないが、さらにコードが肥大化するため、畳み込みはone stepずつ進める *)
   | BinOp (id, binOp, op1, op2) ->
       let prop = MySet.to_list (Dfa.get_property defs instr BEFORE) in
       let subset1 = get_subset op1 prop in
@@ -167,7 +179,7 @@ let fold defs cfg instr =
           [(_, (b_idx, s_idx))] ->
             let stmt = cfg.(b_idx).stmts.(s_idx) in
            (match stmt with
-              Move (_, Proc l) -> Proc l
+              Move (_, Proc l) -> Proc l (* op_fについてはIntVではなくProc　*)
             | _ -> op_f) 
         | _ -> op_f in
       let ops' = ops_to_ops' cfg prop ops in
@@ -189,6 +201,8 @@ let fold defs cfg instr =
       let ops' = ops_to_ops' cfg prop ops in
       update cfg instr (Malloc (id, ops'));
       Malloc (id, ops')
+    (* ReadはMallocの中身まで見に行く *)
+    (* また、IntVだけでなくProcも確認する *)
   | Read (id, op, i) ->
       let prop = MySet.to_list (Dfa.get_property defs instr BEFORE) in
       let subset = get_subset op prop in
@@ -208,6 +222,7 @@ let fold defs cfg instr =
           | _ -> instr)                        
       | _ -> instr
 
+(* then部を削除する関数 *)
 let eliminate_then l1 l2 instr =
   let rec through = function
       [] -> [] 
@@ -220,6 +235,7 @@ let eliminate_then l1 l2 instr =
   in
     through instr
 
+(* else部を削除する関数 *)
 let eliminate_else l1 l2 instr =
   let rec eliminate = function
       [] -> [] 
@@ -232,15 +248,17 @@ let eliminate_else l1 l2 instr =
   in
     eliminate instr
 
+(* bifを（削除できるなら）削除する関数 *)
 let rec eliminate_branchIf  = function
     [] -> []
   | BranchIf (op, l) as head :: rest ->
-      let l' = get_another_label l in
+      let l' = get_another_label l in (* 合流地点に置いてあるラベル *)
      (match judge op with
         T -> eliminate_branchIf (eliminate_else l l' rest)
       | F -> eliminate_branchIf (eliminate_then l l' rest)
       | U -> head :: eliminate_branchIf rest)
   | head :: rest -> head :: eliminate_branchIf rest
+
 
 let fold_const defs cfgs = 
   let cfgs' = List.fold_left (Array.append) [||] (List.map (fun (_, cfg) -> cfg) cfgs) in
