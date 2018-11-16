@@ -63,6 +63,17 @@ let fresh_label =
   in
     body
 
+let mov_to_ldr stmt =
+  match stmt with
+    Instr instr ->
+     (match instr with
+        Mov (reg, addr) ->
+         (match addr with 
+            I i when i > 65535 -> Instr (Ldr (reg, L (string_of_int i)))
+          | _ -> stmt)
+      | _ -> stmt)
+  | _ -> stmt
+
 (* ==== Regマシンコード --> アセンブリコード ==== *)
 
 (* R.decl -> loc list *)
@@ -166,7 +177,7 @@ let gen_decl (Reg.ProcDecl (name, nlocal, instrs)) =
             [Instr (Ldr (rd, mem_access r i));
              Instr (Str (rd, local_access ofs))]
   in
-    let instr_list = List.concat (List.map gen_instr instrs) in
+    let instr_list = List.map mov_to_ldr (List.concat (List.map gen_instr instrs)) in
     [Dir (D_align 2);
      Dir (D_global name);
      Label name;
