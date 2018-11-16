@@ -145,32 +145,6 @@ let fold defs cfg instr =
             | _, _ -> BinOp (id, binOp, op1, op2)) in
       update cfg instr result;
       result  
-      (*let op1' =
-        match subset1 with
-          [(_, (b_idx1, s_idx1))] ->
-            let stmt1 = cfg.(b_idx1).stmts.(s_idx1) in
-           (match stmt1 with
-              Move (_, IntV i) -> IntV i
-            | _ -> op1)
-        | _ -> op1 in
-      let op2' =
-        match subset2 with
-          [(_, (b_idx2, s_idx2))] ->
-            let stmt2 = cfg.(b_idx2).stmts.(s_idx2) in
-           (match stmt2 with
-              Move (_, IntV i) -> IntV i
-            | _ -> op2)
-        | _ -> op2 in
-     (match op1', op2' with
-        IntV i1, IntV i2 -> 
-          let computed_value =
-            match binOp with
-              Plus ->  i1 + i2
-            | Mult -> i1 * i2
-            | Lt -> if i1 < i2 then 1 else 0 in
-          update cfg instr (Move (id, IntV computed_value));
-          Move (id, IntV computed_value)
-      | _ -> BinOp (id, binOp, op1', op2'))*)
   | Label l -> Label l
   | BranchIf (op, l) ->
       let prop = MySet.to_list (Dfa.get_property defs instr BEFORE) in

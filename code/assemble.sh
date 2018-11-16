@@ -22,15 +22,4 @@ gcc -o bin/seq lib/main.c assembly/seq.s
 gcc -o bin/seqopt lib/main.c assembly/seqopt.s
 gcc -o bin/sort lib/main.c assembly/sort.s
 gcc -o bin/sortopt lib/main.c assembly/sortopt.s
-gcc -o bin/bst lib/main.c assembly/bst.s
-gcc -o bin/bstopt lib/main.c assembly/bstopt.s
-gcc -o bin/fenv lib/main.c assembly/fenv.s
-gcc -o bin/fenvopt lib/main.c assembly/fenvopt.s
-gcc -o bin/fib lib/main.c assembly/fib.s
-gcc -o bin/fibopt lib/main.c assembly/fibopt.s
-gcc -o bin/rr lib/main.c assembly/rr.s
-gcc -o bin/rropt lib/main.c assembly/rropt.s
-gcc -o bin/rw lib/main.c assembly/rw.s
-gcc -o bin/rwopt lib/main.c assembly/rwopt.s
-gcc -o bin/csort lib/main.c assembly/csort.s
-gcc -o bin/csortopt lib/main.c assembly/csortopt.s
+

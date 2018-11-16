@@ -221,7 +221,6 @@ let convert exp =
         let (decl_id_set, var_id_set) = (delete_duplication decl_id_list [], delete_duplication var_id_list []) in
         (* var_id_set - decl_id_set をすることで自由変数のidを取り出す *)
         let free_var_id = diff var_id_set decl_id_set in
-        print_string (id1 ^ ": " ^ string_of_ids free_var_id); print_newline();
         (* 自由変数のidにVarをつけてvalueにする *)
         let free_var = var_of_id free_var_id in
         (* 関数名のリネーム *)

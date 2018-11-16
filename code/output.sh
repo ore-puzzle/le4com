@@ -22,15 +22,4 @@
 ./minimlc -o assembly/seqopt.s -O test/advanced/seq.ml
 ./minimlc -o assembly/sort.s test/advanced/sort.ml
 ./minimlc -o assembly/sortopt.s -O test/advanced/sort.ml
-./minimlc -o assembly/bst.s contest/bst.ml
-./minimlc -o assembly/bstopt.s -O contest/bst.ml
-./minimlc -o assembly/fenv.s contest/fenv.ml
-./minimlc -o assembly/fenvopt.s -O contest/fenv.ml
-./minimlc -o assembly/fib.s contest/fib.ml
-./minimlc -o assembly/fibopt.s -O contest/fib.ml
-./minimlc -o assembly/rr.s contest/rr.ml
-./minimlc -o assembly/rropt.s -O contest/rr.ml
-./minimlc -o assembly/rw.s contest/rw.ml
-./minimlc -o assembly/rwopt.s -O contest/rw.ml
-./minimlc -o assembly/csort.s contest/sort.ml
-./minimlc -o assembly/csortopt.s -O contest/sort.ml
+

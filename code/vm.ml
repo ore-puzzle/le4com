@@ -204,7 +204,7 @@ let trans_decl (F.RecDecl (proc_name, params, body)) =
         let goto = Goto lbl in
         [subst; goto]
   in
-    let ids = gather_id_from_exp body in print_string (" " ^ proc_name ^ ": " ^ string_of_ids ids);
+    let ids = gather_id_from_exp body in
     let delta = make_delta params ids in
     let instrs = trans_exp body delta 0 0 "dummy" in
     let return i = [Return (Local i)] in

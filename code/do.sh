@@ -22,15 +22,3 @@ bin/seq
 bin/seqopt
 bin/sort
 bin/sortopt
-bin/bst
-bin/bstopt
-bin/fenv
-bin/fenvopt
-bin/fib
-bin/fibopt
-bin/rr
-bin/rropt
-bin/rw
-bin/rwopt
-bin/csort
-bin/csortopt
