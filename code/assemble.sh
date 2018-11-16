@@ -32,5 +32,5 @@ gcc -o bin/rr lib/main.c assembly/rr.s
 gcc -o bin/rropt lib/main.c assembly/rropt.s
 gcc -o bin/rw lib/main.c assembly/rw.s
 gcc -o bin/rwopt lib/main.c assembly/rwopt.s
-gcc -o bin/sort lib/main.c assembly/sort.s
-gcc -o bin/sortopt lib/main.c assembly/sortopt.s
+gcc -o bin/csort lib/main.c assembly/csort.s
+gcc -o bin/csortopt lib/main.c assembly/csortopt.s

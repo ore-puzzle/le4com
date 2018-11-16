@@ -32,5 +32,5 @@ bin/rr
 bin/rropt
 bin/rw
 bin/rwopt
-bin/sort
-bin/sortopt
+bin/csort
+bin/csortopt
