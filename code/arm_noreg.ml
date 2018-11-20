@@ -40,16 +40,16 @@ let fresh_label =
 
 (* Mallocで値を格納していくための関数 *)
 (* 格納先のメモリはA1に入っていることを前提としている *)
-let make_instr_of_malloc a1 ops =
+let make_instr_of_malloc ops =
   let rec body_loop ofs = function
       [] -> []
-    | (Vm.Param i) :: rest when param_to_reg i = a1 ->
+    | (Vm.Param i) :: rest when param_to_reg i = A1 ->
         [Instr (Ldr (V1, mem_access Sp 0));
-         Instr (Str (V1, mem_access a1 ofs))] @
+         Instr (Str (V1, mem_access A1 ofs))] @
         body_loop (ofs + 1) rest
     | op :: rest -> 
         (gen_operand V1 op) @ 
-        [Instr (Str (V1, mem_access a1 ofs))] @
+        [Instr (Str (V1, mem_access A1 ofs))] @
         body_loop (ofs + 1) rest
   in
     body_loop 0 ops
@@ -150,7 +150,7 @@ let gen_decl (Vm.ProcDecl (name, nlocal, instrs)) =
         (gen_operand A1 op) @
         [Instr (B (name ^ "_ret"))]
     | Vm.Malloc (id, ops) ->
-        let part_of_instr = make_instr_of_malloc A1 ops in
+        let part_of_instr = make_instr_of_malloc ops in
         [Instr (Str (A1, mem_access Sp 0));
          Instr (Str (A2, mem_access Sp 1));
          Instr (Mov (A1, (I (List.length ops))));

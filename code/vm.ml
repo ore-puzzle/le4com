@@ -187,7 +187,7 @@ let trans_decl (F.RecDecl (proc_name, params, body)) =
         let op = trans_value v delta in
         [Read (tgt, op, i)] 
   (* F.expの変換 *)
-  (* tgt　= 末永先生の資料のtgt
+  (* tgt = 末永先生の資料のtgt
      loop_var = Loopで束縛する変数
      lbl = Loopの先頭につけるラベル *)
   and trans_exp exp delta tgt loop_var lbl =
@@ -215,7 +215,7 @@ let trans_decl (F.RecDecl (proc_name, params, body)) =
     let ids = gather_id_from_exp body in
     let delta = make_delta params ids in
     let instrs = trans_exp body delta 0 0 "dummy" in
-    let return i = [Return (Local i)] in
+    let return i = [Return (Local i)] in (* 最適化でidentityを保つために関数化している *)
     ProcDecl (proc_name, (List.length ids) + 1, (* 返り値を格納する変数のために+1をしている *)
               instrs @ (return 0)) (* 最後はt0を返す *)
 

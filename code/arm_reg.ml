@@ -117,9 +117,9 @@ let gen_decl (Reg.ProcDecl (name, nlocal, instrs)) =
         [Instr (Str (reg_of rd, (local_access ofs)))]
     | Reg.BinOp (rd, binOp, op1, op2) ->
         let r1 = reg_of rd in
-        let (r2, addr, li, intv_other_flag) =
+        let (r2, addr, li, intv_other_flag) = (* intv_other_flagはop1がIntVでop2がそれ以外場合にtrueとなる *)
           match op1, op2 with
-            Reg.IntV i1, Reg.IntV i2 -> (* 定数畳み込みによりこの場合はあり得ない *)
+            Reg.IntV i1, Reg.IntV i2 -> (* 定数畳み込みによりこの場合はあり得ないはず *)
               (A3, I i2, [Instr (Mov (A3, I i1))], false)
           | Reg.IntV i1, _ -> (reg_of_param_or_reg op2, I i1, [], true)
           | _, Reg.IntV i2 -> (reg_of_param_or_reg op1, I i2, [], false)
@@ -135,7 +135,7 @@ let gen_decl (Reg.ProcDecl (name, nlocal, instrs)) =
             let l1 = fresh_label name in
             let l2 = fresh_label name in
             li @
-            (match intv_other_flag with
+            (match intv_other_flag with (* Cmpは可換ではないので変換をやりなおす *)
                true -> [Instr (Mov (A3, addr_of_rop op1));
                         Instr (Cmp (A3, addr_of_rop op2))]
              | false -> [Instr (Cmp (r2, addr))]) @

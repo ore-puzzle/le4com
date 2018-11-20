@@ -1,7 +1,7 @@
 open Vm
 open Cfg
 
-
+(* constantFoldingのIntVの部分がLocalまたはParamになったのとほぼ同じ *)
 
 let get_subset op prop =
   match op with

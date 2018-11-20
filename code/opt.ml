@@ -93,7 +93,8 @@ let optimize is_disp_cfg nreg vmcode =
     if elim_flag then
     dprint (fun () -> "\n(* [Elim code] *)\n" ^ (Vm.string_of_vm vmcode'''));
     print_string ("\n");
- 
+
+    (* もし変化したならもう一度ループする *)
     if copy_flag || fold_flag || elim_flag then opt_loop vmcode'''
     else vmcode''' in
 
