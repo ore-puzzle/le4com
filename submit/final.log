@@ -1,0 +1,351 @@
+This is e-pTeX, Version 3.14159265-p3.6-141210-2.6 (utf8.euc) (TeX Live 2015/Debian) (preloaded format=platex 2018.1.10)  21 NOV 2018 18:01
+entering extended mode
+ restricted \write18 enabled.
+ %&-line parsing enabled.
+**final.tex
+(./final.tex
+pLaTeX2e <2006/11/10> (based on LaTeX2e <2016/02/01> patch level 0)
+Babel <3.9n> and hyphenation patterns for 11 languages loaded.
+(/usr/share/texlive/texmf-dist/tex/platex/base/jarticle.cls
+Document Class: jarticle 2006/06/27 v1.6 Standard pLaTeX class
+\c@@paper=\count81
+(/usr/share/texlive/texmf-dist/tex/platex/base/jsize10.clo
+File: jsize10.clo 2006/06/27 v1.6 Standard pLaTeX file (size option)
+)
+\c@part=\count82
+\c@section=\count83
+\c@subsection=\count84
+\c@subsubsection=\count85
+\c@paragraph=\count86
+\c@subparagraph=\count87
+\c@figure=\count88
+\c@table=\count89
+\abovecaptionskip=\skip41
+\belowcaptionskip=\skip42
+\symmincho=\mathgroup4
+LaTeX Font Info:    Overwriting symbol font `mincho' in version `bold'
+(Font)                  JY1/mc/m/n --> JY1/gt/m/n on input line 601.
+\toclineskip=\dimen118
+\@lnumwidth=\dimen119
+\bibindent=\dimen120
+\heisei=\count90
+)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphicx.sty
+Package: graphicx 2014/10/28 v1.0g Enhanced LaTeX Graphics (DPC,SPQR)
+
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/keyval.sty
+Package: keyval 2014/10/28 v1.15 key=value parser (DPC)
+\KV@toks@=\toks15
+)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphics.sty
+Package: graphics 2016/01/03 v1.0q Standard LaTeX Graphics (DPC,SPQR)
+
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/trig.sty
+Package: trig 2016/01/03 v1.10 sin cos tan (DPC)
+)
+(/usr/share/texlive/texmf-dist/tex/latex/latexconfig/graphics.cfg
+File: graphics.cfg 2010/04/23 v1.9 graphics configuration of TeX Live
+)
+Package graphics Info: Driver file: dvipdfmx.def on input line 95.
+
+(/usr/share/texlive/texmf-dist/tex/latex/dvipdfmx-def/dvipdfmx.def
+File: dvipdfmx.def 2015/11/04 v4.07 LaTeX color/graphics driver for dvipdfmx (T
+eX Live/ChoF)
+
+(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/infwarerr.sty
+Package: infwarerr 2010/04/08 v1.3 Providing info/warning/error messages (HO)
+)
+(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/ltxcmds.sty
+Package: ltxcmds 2011/11/09 v1.22 LaTeX kernel commands for general use (HO)
+)))
+\Gin@req@height=\dimen121
+\Gin@req@width=\dimen122
+)
+(/usr/share/texlive/texmf-dist/tex/latex/here/here.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/float/float.sty
+Package: float 2001/11/08 v1.3d Float enhancements (AL)
+\c@float@type=\count91
+\float@exts=\toks16
+\float@box=\box41
+\@float@everytoks=\toks17
+\@floatcapt=\box42
+)
+(/usr/share/texlive/texmf-dist/tex/latex/listings/listings.sty
+\lst@mode=\count92
+\lst@gtempboxa=\box43
+\lst@token=\toks18
+\lst@length=\count93
+\lst@currlwidth=\dimen123
+\lst@column=\count94
+\lst@pos=\count95
+\lst@lostspace=\dimen124
+\lst@width=\dimen125
+\lst@newlines=\count96
+\lst@lineno=\count97
+\lst@maxwidth=\dimen126
+
+(/usr/share/texlive/texmf-dist/tex/latex/listings/lstmisc.sty
+File: lstmisc.sty 2015/06/04 1.6 (Carsten Heinz)
+\c@lstnumber=\count98
+\lst@skipnumbers=\count99
+\lst@framebox=\box44
+)
+(/usr/share/texlive/texmf-dist/tex/latex/listings/listings.cfg
+File: listings.cfg 2015/06/04 1.6 listings configuration
+))
+Package: listings 2015/06/04 1.6 (Carsten Heinz)
+ (./final.aux)
+\openout1 = `final.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 6.
+LaTeX Font Info:    ... okay on input line 6.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 6.
+LaTeX Font Info:    ... okay on input line 6.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 6.
+LaTeX Font Info:    ... okay on input line 6.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 6.
+LaTeX Font Info:    ... okay on input line 6.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 6.
+LaTeX Font Info:    ... okay on input line 6.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 6.
+LaTeX Font Info:    ... okay on input line 6.
+LaTeX Font Info:    Checking defaults for JY1/mc/m/n on input line 6.
+LaTeX Font Info:    ... okay on input line 6.
+LaTeX Font Info:    Checking defaults for JT1/mc/m/n on input line 6.
+LaTeX Font Info:    ... okay on input line 6.
+\c@lstlisting=\count100
+Missing character: There is no ^^8d in font cmr17!
+Missing character: There is no ^^c5 in font cmr17!
+Missing character: There is no ^^8f in font cmr17!
+Missing character: There is no ^^83 in font cmr17!
+Missing character: There is no ^^8c in font cmr17!
+Missing character: There is no ^^83 in font cmr17!
+Missing character: There is no ^^81 in font cmr17!
+Missing character: There is no ^^83 in font cmr17!
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <12> on input line 12.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <8> on input line 12.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <6> on input line 12.
+Missing character: There is no ^^94 in font cmr12!
+Missing character: There is no ^^f6 in font cmr12!
+Missing character: There is no ^^8d in font cmr12!
+Missing character: There is no ^^c4 in font cmr12!
+Missing character: There is no ^^91 in font cmr12!
+Missing character: There is no ^^be in font cmr12!
+
+[1
+
+]
+LaTeX Font Info:    Font shape `JT1/mc/bx/n' in size <14.4> not available
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 15.
+LaTeX Font Info:    Font shape `JY1/mc/bx/n' in size <14.4> not available
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 15.
+Missing character: There is no ^^89 in font cmbx12!
+Missing character: There is no ^^db in font cmbx12!
+Missing character: There is no ^^91 in font cmbx12!
+LaTeX Font Info:    Font shape `JT1/mc/bx/n' in size <12> not available
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 16.
+LaTeX Font Info:    Font shape `JY1/mc/bx/n' in size <12> not available
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 16.
+Missing character: There is no ^^83 in font cmbx12!
+Missing character: There is no ^^83 in font cmbx12!
+Missing character: There is no ^^8d in font cmbx12!
+Missing character: There is no ^^83 in font cmbx12!
+Missing character: There is no ^^83 in font cmbx12!
+Missing character: There is no ^^89 in font cmbx12!
+Missing character: There is no ^^83 in font cmbx12!
+Missing character: There is no ^^80 in font cmbx12!
+Missing character: There is no ^^82 in font cmbx12!
+Missing character: There is no ^^cc in font cmbx12!
+Missing character: There is no ^^90 in font cmbx12!
+Missing character: There is no ^^dd in font cmbx12!
+Missing character: There is no ^^8c in font cmbx12!
+Missing character: There is no ^^95 in font cmbx12!
+Missing character: There is no ^^fb in font cmbx12!
+Missing character: There is no ^^90 in font cmbx12!
+Missing character: There is no ^^8a in font cmr10!
+Missing character: There is no ^^93 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^c9 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^cd in font cmr10!
+Missing character: There is no ^^96 in font cmr10!
+Missing character: There is no ^^96 in font cmr10!
+Missing character: There is no ^^89 in font cmr10!
+Missing character: There is no ^^90 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^cc in font cmr10!
+Missing character: There is no ^^8b in font cmr10!
+Missing character: There is no ^^b3 in font cmr10!
+Missing character: There is no ^^89 in font cmr10!
+Missing character: There is no ^^c8 in font cmr10!
+Missing character: There is no ^^8f in font cmr10!
+Missing character: There is no ^^91 in font cmr10!
+Missing character: There is no ^^92 in font cmr10!
+Missing character: There is no ^^ca in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^c9 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^c8 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^c1 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^c4 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^a2 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^8b in font cmr10!
+Missing character: There is no ^^b3 in font cmr10!
+Missing character: There is no ^^89 in font cmr10!
+Missing character: There is no ^^c8 in font cmr10!
+Missing character: There is no ^^8f in font cmr10!
+Missing character: There is no ^^91 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^c9 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^c8 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^a2 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^cc in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^c9 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^c2 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^a2 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^c4 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^cd in font cmr10!
+Missing character: There is no ^^8e in font cmr10!
+Missing character: There is no ^^c0 in font cmr10!
+Missing character: There is no ^^8c in font cmr10!
+Missing character: There is no ^^b1 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^cc in font cmr10!
+Missing character: There is no ^^83 in font cmr10!
+Missing character: There is no ^^81 in font cmr10!
+Missing character: There is no ^^83 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^c9 in font cmr10!
+Missing character: There is no ^^8f in font cmr10!
+Missing character: There is no ^^91 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^a2 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^c4 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^a0 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^ca in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^c9 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^b5 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^bd in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^bb in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^cc in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^bd in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^90 in font cmr10!
+Missing character: There is no ^^dd in font cmr10!
+Missing character: There is no ^^8c in font cmr10!
+Missing character: There is no ^^95 in font cmr10!
+Missing character: There is no ^^fb in font cmr10!
+Missing character: There is no ^^90 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^c9 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^c2 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^a2 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^c4 in font cmr10!
+Missing character: There is no ^^93 in font cmr10!
+Missing character: There is no ^^c1 in font cmr10!
+Missing character: There is no ^^95 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^b7 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^d7 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^ab in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^b1 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^c6 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^cd in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^c8 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^a2 in font cmr10!
+Missing character: There is no ^^83 in font cmbx12!
+Missing character: There is no ^^83 in font cmbx12!
+Missing character: There is no ^^8d in font cmbx12!
+Missing character: There is no ^^83 in font cmbx12!
+Missing character: There is no ^^83 in font cmbx12!
+Missing character: There is no ^^89 in font cmbx12!
+Missing character: There is no ^^83 in font cmbx12!
+Missing character: There is no ^^80 in font cmbx12!
+Missing character: There is no ^^82 in font cmbx12!
+Missing character: There is no ^^cc in font cmbx12!
+Missing character: There is no ^^90 in font cmbx12!
+Missing character: There is no ^^e0 in font cmbx12!
+Missing character: There is no ^^96 in font cmbx12!
+Missing character: There is no ^^be in font cmbx12!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^c9 in font cmr10!
+Missing character: There is no ^^92 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^b3 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^c4 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^a2 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^d6 in font cmr10!
+Missing character: There is no ^^90 in font cmr10!
+Missing character: There is no ^^94 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^cc in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^a2 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^ad in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^c2 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^a9 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^c9 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^c2 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^a2 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^c4 in font cmr10!
+Missing character: There is no ^^90 in font cmr10!
+Missing character: There is no ^^e0 in font cmr10!
+Missing character: There is no ^^96 in font cmr10!
+Missing character: There is no ^^be in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+Missing character: There is no ^^b7 in font cmr10!
+Missing character: There is no ^^82 in font cmr10!
+LaTeX Font Info:    Font shape `JT1/mc/bx/n' in size <10> not available
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 20.
+LaTeX Font Info:    Font shape `JY1/mc/bx/n' in size <10> not available
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 20.
+Missing character: There is no ^^8a in font cmbx10!
+Missing character: There is no ^^d6 in font cmbx10!
+Missing character: There is no ^^90 in font cmbx10!
+Missing character: There is no ^^94 in font cmbx10!
+Missing character: There is no ^^81 in font cmbx10!
+Missing character: There is no ^^

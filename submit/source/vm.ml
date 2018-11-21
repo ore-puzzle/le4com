@@ -95,14 +95,14 @@ let rec string_of_ids = function
   | head :: rest -> head ^ "; " ^ string_of_ids rest 
 
 (* ==== support function ==== *)
-(* 変数を集める *)
+
 let rec gather_id_from_exp = function
     F.CompExp (F.IfExp (_, e1, e2)) ->
       let id_list1 = gather_id_from_exp e1 in
       let id_list2 = gather_id_from_exp e2 in
       id_list1 @ id_list2
   | F.LetExp (id, ce, e)
-  | F.LoopExp (id, ce, e) -> (* もう束縛変数しかなく、LetRecもないので、LetとLoopのみに現れる *)
+  | F.LoopExp (id, ce, e) ->
       let id_list1 =
        (match ce with
           F.IfExp (_, e1, e2) ->
@@ -114,8 +114,6 @@ let rec gather_id_from_exp = function
       id :: (id_list1 @ id_list2)
   | _ -> []
 
-
-(* 末永先生の資料の関数δを作る *)
 let make_delta params ids =
   let rec param_loop params index =
     match params with
@@ -130,8 +128,6 @@ let make_delta params ids =
     let delta var = List.assoc var tuple_list in
     delta
 
-
-(* ifのためのフレッシュなラベルを生成する *)
 let fresh_label =
   let counter = ref 0 in
   let body str =
@@ -142,12 +138,11 @@ let fresh_label =
     body
 
 (* ==== 仮想機械コードへの変換 ==== *)
-(* 基本的には末永先生の資料の通りである *)
+
 let trans_decl (F.RecDecl (proc_name, params, body)) =
-  (* F.valueの変換 *)
   let rec trans_value value delta =
     match value with
-      F.Var id -> delta id (* deltaは識別子からオペランドへの写像 *)
+      F.Var id -> delta id
     | F.Fun id -> Proc id
     | F.IntV i -> IntV i
 
@@ -155,7 +150,7 @@ let trans_decl (F.RecDecl (proc_name, params, body)) =
     match value_list with
       [] -> []
     | head :: rest -> (trans_value head delta) :: trans_value_list rest delta
-  (* F.cexpの変換 *)
+
   and trans_cexp cexp delta tgt loop_var lbl =
     match cexp with
       F.ValExp v ->
@@ -186,10 +181,7 @@ let trans_decl (F.RecDecl (proc_name, params, body)) =
     | F.ProjExp (v, i) ->
         let op = trans_value v delta in
         [Read (tgt, op, i)] 
-  (* F.expの変換 *)
-  (* tgt = 末永先生の資料のtgt
-     loop_var = Loopで束縛する変数
-     lbl = Loopの先頭につけるラベル *)
+
   and trans_exp exp delta tgt loop_var lbl =
     match exp with
       F.CompExp ce -> trans_cexp ce delta tgt loop_var lbl
@@ -201,23 +193,23 @@ let trans_decl (F.RecDecl (proc_name, params, body)) =
     | F.LoopExp (id, ce, e) ->
         let (Local new_tgt) = delta id in
         let bind = trans_cexp ce delta new_tgt loop_var lbl in
-        let l = fresh_label proc_name in (* loopの先頭につけるラベル *)
+        let l = fresh_label proc_name in
         let label = Label l in
         let (Local new_id) = delta id in
         let eval = trans_exp e delta tgt new_id l in
         bind @ (label :: eval)
     | F.RecurExp v ->
         let op = trans_value v delta in
-        let subst = Move (loop_var, op) in (* loopを回している変数を更新 *)
-        let goto = Goto lbl in (* loopの先頭へ *)
+        let subst = Move (loop_var, op) in
+        let goto = Goto lbl in
         [subst; goto]
   in
     let ids = gather_id_from_exp body in
     let delta = make_delta params ids in
     let instrs = trans_exp body delta 0 0 "dummy" in
-    let return i = [Return (Local i)] in (* 最適化でidentityを保つために関数化している *)
-    ProcDecl (proc_name, (List.length ids) + 1, (* 返り値を格納する変数のために+1をしている *)
-              instrs @ (return 0)) (* 最後はt0を返す *)
+    let return i = [Return (Local i)] in
+    ProcDecl (proc_name, (List.length ids) + 1, 
+              instrs @ (return 0))
 
 (* entry point *)
 let trans = List.map trans_decl

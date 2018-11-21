@@ -166,23 +166,23 @@ let rec get_properties_as_list lives = function
     [] -> []
   | stmt :: rest -> 
      (match stmt with
-        Vm.Label _ -> get_properties_as_list lives rest
+        Vm.Label _ -> get_properties_as_list lives rest (* ラベルにプロパティはない *)
       | _ -> (MySet.to_list (Dfa.get_property lives stmt Cfg.BEFORE)) ::
              (MySet.to_list (Dfa.get_property lives stmt Cfg.AFTER)) ::
               get_properties_as_list lives rest)
 
 (* プロパティからParamを取り除いてLocalだけにする関数 *)
-let rec trans_props_from_op_to_ofs = function
+let rec trans_props_from_op_to_id = function
     [] -> []
   | prop :: rest ->
-      List.map (fun (Vm.Local ofs) -> ofs) 
+      List.map (fun (Vm.Local id) -> id) 
                (List.filter                                 (* 解析に使ったdummyもはじく *)
-                 (fun op -> match op with Vm.Local ofs when ofs <> -1 -> true | _ -> false) prop) ::
-      trans_props_from_op_to_ofs rest
+                 (fun op -> match op with Vm.Local id when id <> -1 -> true | _ -> false) prop) ::
+      trans_props_from_op_to_id rest
 
 (* 隣接行列を生成する関数 *)
-(* ofses = リストのリストで、各要素の中に含まれているofsは同時に生存している *)
-let make_adjacency_matrix ofses size instrs =
+(* ids = リストのリストで、各要素の中に含まれているidsは同時に生存している *)
+let make_adjacency_matrix ids size instrs =
   (* すべて0の行列、これを書き換えていく *)
   let matrix = Array.make_matrix size size 0 in
   let rec outer_loop = function
@@ -201,17 +201,17 @@ let make_adjacency_matrix ofses size instrs =
   and outer_loop_for_asn = function
       [] -> ()
     | Vm.Malloc (id, ops) :: rest -> inner_loop_for_asn id ops; outer_loop_for_asn rest
-  and inner_loop_for_asn ofs = function
+  and inner_loop_for_asn id = function
       [] -> () (* Mallocのopsは空ではあり得ないので実行されない *)
     | head :: rest ->
        (match head with
-          Vm.Local ofs' -> (* Mallocの格納先と格納されるものは同時に生存している *)
-            matrix.(ofs).(ofs') <- 1;
-            matrix.(ofs').(ofs) <- 1;
-            inner_loop_for_asn ofs rest
-        | _ -> inner_loop_for_asn ofs rest)
+          Vm.Local id' -> (* Mallocの格納先と格納されるものは同時に生存している *)
+            matrix.(id).(id') <- 1;
+            matrix.(id').(id) <- 1;
+            inner_loop_for_asn id rest
+        | _ -> inner_loop_for_asn id rest)
   in
-    outer_loop ofses;
+    outer_loop ids;
     outer_loop_for_asn (List.filter (fun instr -> match instr with Vm.Malloc _ -> true | _ -> false) instrs);
     matrix
 
@@ -279,7 +279,7 @@ let make_assigns dest ops map =
   in
     body_loop 0 ops
 
-(* プロパティ中のofsをマップされているレジスタに変換する関数 *)
+(* プロパティの要素をマップされているレジスタに変換する関数 *)
 let rec map_property prop map =
   match prop with
     [] -> []
@@ -309,9 +309,9 @@ let rec make_escape_recover_instrs index = function
       (Store (head, index) :: store, Load (head, index) :: load)
 
 (* 使えるレジスタのリストを返す関数 *)
-let make_regs nreg =
+let make_regs nreg = (* nregは1以上と想定 *)
   let rec body_loop num =
-    if num = 0 then (* thenはある程度後のほうで実行されると想定 *)
+    if num = 0 then
       [num]
     else
       num :: body_loop (num - 1)
@@ -319,8 +319,11 @@ let make_regs nreg =
     List.rev (body_loop (nreg - 1))
 
 (* ==== レジスタ割付け ==== *)
-
+(* 頂点を彩色していく関数 *)
+(* node_color = 実際に色が塗られていく頂点と色の組、常に全体を表す
+   now_node_color = ループを回すための頂点と色の組、一つ前のループのrest *)
 let rec paint node_color adjacency_matrix now_node_color =
+  (* 隣接している頂点の色の集合(dummyは除く)を得るための関数 *)
   let rec get_adjacent_colors neighbor = function
       [] -> []
     | 0 :: rest -> get_adjacent_colors (neighbor+1) rest
@@ -334,21 +337,30 @@ let rec paint node_color adjacency_matrix now_node_color =
         let new_color = (get_max dummy adjacent_colors) + 1 in
         (node, new_color) :: paint (replace (node, new_color) node_color) adjacency_matrix rest
 
+(* 彩色された頂点集合と汎用レジスタの数から、色からレジスタまたはローカル領域へのマップを作る関数 *)
 let make_map nreg painted_node_color =
+  (* local_numは現時点での局所変数の数を表す *)
   let rec body_loop nreg local_num = function
       [] -> 
         if local_num = 0 then ([], local_num)
-        else ([], local_num + 1)
+        else ([], local_num + 1) (* 局所変数が一つでもある場合は退避のための領域をもう一つ確保する *)
     | (node, color) :: rest ->
         if color < nreg then
           let (tail, result_local_num) = body_loop nreg local_num rest in
           ((node, R color) :: tail, result_local_num)
-        else 
+        else  (* あふれた分はローカル領域にマップ *)
           let (tail, result_local_num) = body_loop nreg (local_num+1) rest in
-          ((node, L (color - nreg + 1)) :: tail, result_local_num)
+          ((node, L (color - nreg + 1)) :: tail, result_local_num) (* 0は退避のために空けておく *)
   in
     body_loop nreg 0 painted_node_color
 
+(* Callを変換する関数 *)
+(* あまりに巨大になったので分けた *)
+(* 関数を表すopと引数を表すop1、op2がLocalかどうかで8通りに場合分けして、
+   さらに、そのLocalがレジスタかローカル領域のどちらにマップされているかで場合分け *)
+(* ローカル領域にマップされているものは
+   reserved_reg > 空いているレジスタ > 関数呼び出しのためにすでに退避したレジスタ の順に
+   レジスタに読み出してからCallする *)
 let make_call_instr dest op op1 op2 available_regs escaped_regs map =
   match op, op1, op2 with
     Vm.Local id, Vm.Local id1, Vm.Local id2 ->
@@ -489,7 +501,9 @@ let make_call_instr dest op op1 op2 available_regs escaped_regs map =
     | _, _, _ ->
         [Call (dest, rop_of_vop op, [rop_of_vop op1; rop_of_vop op2])] 
 
-let trans_inst map inst lives local_num available_regs =
+(* 実際にVmからRegに変換する関数 *)
+(* Callの場合にレジスタを退避しなければならないので、引数にいろいろある *)
+let trans_instr map inst lives local_num available_regs =
   match inst with
     Vm.Move (id, op) -> 
      (match List.assoc id map, op with
@@ -506,7 +520,7 @@ let trans_inst map inst lives local_num available_regs =
       | L ofs, _ -> [Move (reserved_reg, rop_of_vop op);
                      Store (reserved_reg, ofs)])
   | Vm.BinOp (id, binOp, op1, op2) ->
-      let (store, dist_reg) = 
+      let (store, dest_reg) = 
         match List.assoc id map with 
           R reg -> ([], reg)
         | L ofs -> ([Store (reserved_reg, ofs)], reserved_reg) in
@@ -523,17 +537,20 @@ let trans_inst map inst lives local_num available_regs =
            (match List.assoc id2 map with
               R reg -> ([], Reg reg)
             | L ofs ->
-                if List.length load1 = 0 then ([Load (reserved_reg, ofs)], Reg reserved_reg) 
+                (* op1がローカル領域にマップされた変数でなければ *)
+                if List.length load1 = 0 then ([Load (reserved_reg, ofs)], Reg reserved_reg)
+                (* op1がローカル領域にマップされた変数ならば *)
                 else 
                   if List.length available_regs <> 0 then
                     let free_reg = List.hd available_regs in
                     ([Load (free_reg, ofs)], Reg free_reg)                    
-                  else
+                  else (* 空いているレジスタがなければV1を退避してそこに読みだす *)
                     ([Store (0, tmp);
                       Load (0, ofs);
                       Load (0, tmp)], Reg 0))
         | _ -> ([], rop_of_vop op2) in
-      let binOp_inst = [BinOp (dist_reg, binOp, arg1, arg2)] in
+      let binOp_inst = [BinOp (dest_reg, binOp, arg1, arg2)] in
+      (* V1を退避させていたなら *)
       if List.length load2 = 3 then
         let (load2', recover) = match load2 with first :: second :: [third] -> ([first; second], [third]) in
         load1 @ load2' @ binOp_inst @ store @ recover
@@ -551,6 +568,7 @@ let trans_inst map inst lives local_num available_regs =
   | Vm.Goto label -> [Goto label]
   | Vm.Call (id, op, ops) ->
       let prop = Dfa.get_property lives inst Cfg.AFTER in
+      (* この命令の後に生きているもので、この命令の結果が格納されているものではないレジスタ群 *)
       let should_escaped_regs = map_property (MySet.to_list (MySet.diff prop (MySet.singleton (Vm.Local id)))) map in
       let (stores, loads) = make_escape_recover_instrs local_num should_escaped_regs in 
       let dest = List.assoc id map in
@@ -578,32 +596,43 @@ let trans_inst map inst lives local_num available_regs =
                        Read (dest, Reg reserved_reg, i)])
       | _ -> [Read (dest, rop_of_vop op, i)]
 
+(* 命令を変換させていく関数 *)
+(* 空いているレジスタを得るためにList.mapではなくループにした *)
 let trans_instrs nreg lives map regs local_num instrs =
   let rec body_loop = function
     [] -> []
   | head :: rest ->
       let prop = 
         match head with
-          Vm.Label _ -> MySet.empty
+          Vm.Label _ -> MySet.empty (* ラベルにプロパティはない *)
         | _ -> Dfa.get_property lives head Cfg.BEFORE in 
       let using_regs = MySet.from_list (map_property (MySet.to_list prop) map) in
       let available_regs = MySet.to_list (MySet.diff regs using_regs) in 
-      (trans_inst map head lives local_num available_regs) :: body_loop rest
+      (trans_instr map head lives local_num available_regs) :: body_loop rest
   in
     body_loop instrs
       
 
 let trans_decl nreg lives (Vm.ProcDecl (lbl, nlocal, instrs)) =
+  (* すべてのプロパティを得る *)
   let props = get_properties_as_list lives instrs in
-  let ofses = trans_props_from_op_to_ofs props in
+  (* プロパティをローカル変数のオフセットに変換する *)
+  let ids = trans_props_from_op_to_id props in
+  (* 頂点と色の組を作る(まだ色はdummy) *)
   let node_color = List.rev (make_node_color_list nlocal) in
-  let adjacency_matrix = make_adjacency_matrix ofses nlocal instrs in
+  (* 隣接行列を作る *)
+  let adjacency_matrix = make_adjacency_matrix ids nlocal instrs in
+  (* 頂点と色の組を頂点の次数によってソート *)
   let ordered_node_color = sort_by_degree node_color adjacency_matrix in
+  (* 頂点に色を塗って、レジスタ、あるいはローカル領域へのマップを作る *)
   let (map, local_num) = make_map nreg (paint ordered_node_color adjacency_matrix ordered_node_color) in
+  (* 確保すべきローカル領域を得る *)
   let new_nlocal = local_num + get_max_tmp instrs lives map 0 in
+  (* 使えるレジスタの集合 *)
   let regs = MySet.from_list (make_regs nreg) in
-  let insts' = trans_instrs nreg lives map regs local_num instrs in
-  ProcDecl (lbl, new_nlocal, List.concat insts')
+  (* 命令を変換 *)
+  let instrs' = trans_instrs nreg lives map regs local_num instrs in
+  ProcDecl (lbl, new_nlocal, List.concat instrs')
 
 (* entry point *)
 let trans nreg lives = List.map (trans_decl nreg lives)

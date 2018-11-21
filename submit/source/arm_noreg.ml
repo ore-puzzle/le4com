@@ -28,7 +28,6 @@ let gen_operand rd = function
   | Vm.IntV  i -> [Instr (Mov (rd, I i))]
 
 (* ==== support function ==== *)
-(* LtをCmpにするときのためのフレッシュなラベルを生成する関数 *)
 let fresh_label =
   let counter = ref 0 in
   let body str =
@@ -38,23 +37,20 @@ let fresh_label =
   in
     body
 
-(* Mallocで値を格納していくための関数 *)
-(* 格納先のメモリはA1に入っていることを前提としている *)
-let make_instr_of_malloc ops =
+let make_instr_of_malloc a1 ops =
   let rec body_loop ofs = function
       [] -> []
-    | (Vm.Param i) :: rest when param_to_reg i = A1 ->
+    | (Vm.Param i) :: rest when param_to_reg i = a1 ->
         [Instr (Ldr (V1, mem_access Sp 0));
-         Instr (Str (V1, mem_access A1 ofs))] @
+         Instr (Str (V1, mem_access a1 ofs))] @
         body_loop (ofs + 1) rest
     | op :: rest -> 
         (gen_operand V1 op) @ 
-        [Instr (Str (V1, mem_access A1 ofs))] @
+        [Instr (Str (V1, mem_access a1 ofs))] @
         body_loop (ofs + 1) rest
   in
     body_loop 0 ops
 
-(* intを2進数に変換して、それをstringにしている *)
 let to_binary_str i =
   let rec body_loop n mod_list =
     let quo = n / 2 in
@@ -66,18 +62,14 @@ let to_binary_str i =
   in
     List.fold_left (fun x y -> x ^ y) "" (List.map string_of_int (body_loop i []))
 
-(* 与えられた2進数の1が立っている範囲を返す *)
 let get_max_range bstr =
   try
     let left = String.index bstr '1' in
     let right = String.rindex bstr '1' in
     right - left + 1
   with
-    Not_found -> 0 (* すべて0の場合 *)
+    Not_found -> 0
 
-(* ARMの#を用いた即値として不適切なものを=でロードするものに変える *)
-(* ldrのaddrの部分に[=const]とすれば大丈夫みたいなので、
-   本来は適切ではないがLとして即値を表現している *)
 let imm_to_ldr [stmt] =
   match stmt with
     Instr instr ->
@@ -150,7 +142,7 @@ let gen_decl (Vm.ProcDecl (name, nlocal, instrs)) =
         (gen_operand A1 op) @
         [Instr (B (name ^ "_ret"))]
     | Vm.Malloc (id, ops) ->
-        let part_of_instr = make_instr_of_malloc ops in
+        let part_of_instr = make_instr_of_malloc A1 ops in
         [Instr (Str (A1, mem_access Sp 0));
          Instr (Str (A2, mem_access Sp 1));
          Instr (Mov (A1, (I (List.length ops))));
