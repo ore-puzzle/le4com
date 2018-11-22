@@ -1,0 +1,135 @@
+digraph CFG {
+  node [shape=record fontname="courier"]
+  _b__f00 [label="{_b__f0:\l|\{p1\}\l\<BEGIN: _b__f0\>\l\{p1\}\l}"];
+  _b__f01 [label="{\{p1\}\lnew  t1 [_b__f11, p1]\l\{t1\}\lret  t1\l\{\}\l}"];
+  _b__f02 [label="{\{\}\l\<END: _b__f0\>\l\{\}\l}"];
+
+  _b__f00 -> _b__f01
+  _b__f01 -> _b__f02
+  
+  _b__f110 [label="{_b__f11:\l|\{p0, p1\}\l\<BEGIN: _b__f11\>\l\{p0, p1\}\l}"];
+  _b__f111 [label="{\{p0, p1\}\lread  t1 #1(p0)\l\{p1, t1\}\llt  t2, t1, p1\l\{p1, t1, t2\}\lbif  t2, L_b__f11_0\l\{p1, t1\}\l}"];
+  _b__f112 [label="{\{p1, t1\}\llt  t3, p1, t1\l\{t3\}\lbif  t3, L_b__f11_2\l\{\}\l}"];
+  _b__f113 [label="{\{\}\lmove  t0, 1\l\{t0\}\lgoto  L_b__f11_3\l\{t0\}\l}"];
+  _b__f114 [label="{L_b__f11_2:\l|\{\}\lmove  t0, 0\l\{t0\}\l}"];
+  _b__f115 [label="{L_b__f11_3:\l|\{t0\}\lgoto  L_b__f11_1\l\{t0\}\l}"];
+  _b__f116 [label="{L_b__f11_0:\l|\{\}\lmove  t0, 0\l\{t0\}\l}"];
+  _b__f117 [label="{L_b__f11_1:\l|\{t0\}\lret  t0\l\{\}\l}"];
+  _b__f118 [label="{\{\}\l\<END: _b__f11\>\l\{\}\l}"];
+
+  _b__f110 -> _b__f111
+  _b__f111 -> _b__f116
+  _b__f111 -> _b__f112
+  _b__f112 -> _b__f114
+  _b__f112 -> _b__f113
+  _b__f113 -> _b__f115
+  _b__f114 -> _b__f115
+  _b__f115 -> _b__f117
+  _b__f116 -> _b__f117
+  _b__f117 -> _b__f118
+  
+  _b__f10 [label="{_b__f1:\l|\{p1\}\l\<BEGIN: _b__f1\>\l\{p1\}\l}"];
+  _b__f11 [label="{\{p1\}\lread  t0 #0(p1)\l\{t0\}\lret  t0\l\{\}\l}"];
+  _b__f12 [label="{\{\}\l\<END: _b__f1\>\l\{\}\l}"];
+
+  _b__f10 -> _b__f11
+  _b__f11 -> _b__f12
+  
+  _b__f20 [label="{_b__f2:\l|\{p1\}\l\<BEGIN: _b__f2\>\l\{p1\}\l}"];
+  _b__f21 [label="{\{p1\}\lread  t0 #1(p1)\l\{t0\}\lret  t0\l\{\}\l}"];
+  _b__f22 [label="{\{\}\l\<END: _b__f2\>\l\{\}\l}"];
+
+  _b__f20 -> _b__f21
+  _b__f21 -> _b__f22
+  
+  _b_map0 [label="{_b_map:\l|\{p0, p1\}\l\<BEGIN: _b_map\>\l\{p0, p1\}\l}"];
+  _b_map1 [label="{\{p0, p1\}\lread  t1 #1(p0)\l\{p0, p1, t1\}\lread  t2 #2(p0)\l\{p0, p1, t1, t2\}\lread  t3 #3(p0)\l\{p0, p1, t1, t2, t3\}\lread  t4 #4(p0)\l\{p0, p1, t1, t2, t3, t4\}\lnew  t5 [_b__f10, t1, t2, t3, p1, p0, t4]\l\{t5\}\lret  t5\l\{\}\l}"];
+  _b_map2 [label="{\{\}\l\<END: _b_map\>\l\{\}\l}"];
+
+  _b_map0 -> _b_map1
+  _b_map1 -> _b_map2
+  
+  _b__f100 [label="{_b__f10:\l|\{p0, p1\}\l\<BEGIN: _b__f10\>\l\{p0, p1\}\l}"];
+  _b__f101 [label="{\{p0, p1\}\lread  t1 #1(p0)\l\{p0, p1, t1\}\lread  t2 #2(p0)\l\{p0, p1, t1, t2\}\lread  t3 #3(p0)\l\{p0, p1, t1, t2, t3\}\lread  t4 #4(p0)\l\{p0, p1, t1, t2, t3, t4\}\lread  t5 #5(p0)\l\{p0, p1, t1, t2, t3, t4, t5\}\lread  t6 #6(p0)\l\{p1, t1, t2, t3, t4, t5, t6\}\lread  t7 #0(t1)\l\{p1, t1, t2, t3, t4, t5, t6, t7\}\lcall  t8, t7(t1, p1)\l\{p1, t2, t3, t4, t5, t6, t8\}\lread  t9 #0(t8)\l\{p1, t2, t3, t4, t5, t6, t8, t9\}\lcall  t10, t9(t8, t2)\l\{p1, t10, t2, t3, t4, t5, t6\}\lbif  t10, L_b__f10_4\l\{p1, t2, t3, t4, t5, t6\}\l}"];
+  _b__f102 [label="{\{p1, t3, t4, t5, t6\}\lread  t11 #0(t3)\l\{p1, t11, t3, t4, t5, t6\}\lcall  t12, t11(t3, p1)\l\{p1, t12, t4, t5, t6\}\lread  t13 #0(t4)\l\{p1, t12, t13, t4, t5, t6\}\lcall  t14, t13(t4, t12)\l\{p1, t14, t4, t5, t6\}\lread  t15 #0(t5)\l\{p1, t14, t15, t4, t5, t6\}\lcall  t16, t15(t5, t4)\l\{p1, t14, t16, t6\}\lread  t17 #0(t6)\l\{p1, t14, t16, t17, t6\}\lcall  t18, t17(t6, p1)\l\{t14, t16, t18\}\lread  t19 #0(t16)\l\{t14, t16, t18, t19\}\lcall  t20, t19(t16, t18)\l\{t14, t20\}\lnew  t0 [t14, t20]\l\{t0\}\lgoto  L_b__f10_5\l\{t0\}\l}"];
+  _b__f103 [label="{L_b__f10_4:\l|\{t2\}\lmove  t0, t2\l\{t0\}\l}"];
+  _b__f104 [label="{L_b__f10_5:\l|\{t0\}\lret  t0\l\{\}\l}"];
+  _b__f105 [label="{\{\}\l\<END: _b__f10\>\l\{\}\l}"];
+
+  _b__f100 -> _b__f101
+  _b__f101 -> _b__f103
+  _b__f101 -> _b__f102
+  _b__f102 -> _b__f104
+  _b__f103 -> _b__f104
+  _b__f104 -> _b__f105
+  
+  _b__f30 [label="{_b__f3:\l|\{p0, p1\}\l\<BEGIN: _b__f3\>\l\{p0, p1\}\l}"];
+  _b__f31 [label="{\{p0, p1\}\lread  t1 #1(p0)\l\{p0, p1, t1\}\lread  t2 #2(p0)\l\{p0, p1, t1, t2\}\lread  t3 #3(p0)\l\{p0, p1, t1, t2, t3\}\lread  t4 #4(p0)\l\{p1, t1, t2, t3, t4\}\lnew  t5 [_b__f7, t1, t2, p1, t3, t4]\l\{t5\}\lret  t5\l\{\}\l}"];
+  _b__f32 [label="{\{\}\l\<END: _b__f3\>\l\{\}\l}"];
+
+  _b__f30 -> _b__f31
+  _b__f31 -> _b__f32
+  
+  _b__f70 [label="{_b__f7:\l|\{p0, p1\}\l\<BEGIN: _b__f7\>\l\{p0, p1\}\l}"];
+  _b__f71 [label="{\{p0, p1\}\lread  t1 #1(p0)\l\{p0, p1, t1\}\lread  t2 #2(p0)\l\{p0, p1, t1, t2\}\lread  t3 #3(p0)\l\{p0, p1, t1, t2, t3\}\lread  t4 #4(p0)\l\{p0, p1, t1, t2, t3, t4\}\lread  t5 #5(p0)\l\{p1, t1, t2, t3, t4, t5\}\lnew  t6 [_b__f8, t1, t2, t3, t4, t5, p1]\l\{t6\}\lret  t6\l\{\}\l}"];
+  _b__f72 [label="{\{\}\l\<END: _b__f7\>\l\{\}\l}"];
+
+  _b__f70 -> _b__f71
+  _b__f71 -> _b__f72
+  
+  _b__f80 [label="{_b__f8:\l|\{p0, p1\}\l\<BEGIN: _b__f8\>\l\{p0, p1\}\l}"];
+  _b__f81 [label="{\{p0, p1\}\lread  t1 #1(p0)\l\{p0, p1, t1\}\lread  t2 #2(p0)\l\{p0, p1, t1, t2\}\lread  t3 #3(p0)\l\{p0, p1, t1, t2, t3\}\lread  t4 #4(p0)\l\{p0, p1, t1, t2, t3, t4\}\lread  t5 #5(p0)\l\{p0, p1, t1, t2, t3, t4, t5\}\lread  t6 #6(p0)\l\{p1, t1, t2, t3, t4, t5, t6\}\lnew  t7 [_b_red, t1, t2, t3, t4, t5]\l\{p1, t6, t7\}\lcall  t9, _b_red(t7, t6)\l\{p1, t9\}\lread  t10 #0(t9)\l\{p1, t10, t9\}\lcall  t0, t10(t9, p1)\l\{t0\}\lret  t0\l\{\}\l}"];
+  _b__f82 [label="{\{\}\l\<END: _b__f8\>\l\{\}\l}"];
+
+  _b__f80 -> _b__f81
+  _b__f81 -> _b__f82
+  
+  _b_red0 [label="{_b_red:\l|\{p0, p1\}\l\<BEGIN: _b_red\>\l\{p0, p1\}\l}"];
+  _b_red1 [label="{\{p0, p1\}\lread  t1 #1(p0)\l\{p0, p1, t1\}\lread  t2 #2(p0)\l\{p0, p1, t1, t2\}\lread  t3 #3(p0)\l\{p0, p1, t1, t2, t3\}\lread  t4 #4(p0)\l\{p0, p1, t1, t2, t3, t4\}\lread  t5 #5(p0)\l\{p0, p1, t1, t2, t3, t4, t5\}\lnew  t6 [_b__f9, t1, t2, p1, t3, t4, p0, t5]\l\{t6\}\lret  t6\l\{\}\l}"];
+  _b_red2 [label="{\{\}\l\<END: _b_red\>\l\{\}\l}"];
+
+  _b_red0 -> _b_red1
+  _b_red1 -> _b_red2
+  
+  _b__f90 [label="{_b__f9:\l|\{p0, p1\}\l\<BEGIN: _b__f9\>\l\{p0, p1\}\l}"];
+  _b__f91 [label="{\{p0, p1\}\lread  t1 #1(p0)\l\{p0, p1, t1\}\lread  t2 #2(p0)\l\{p0, p1, t1, t2\}\lread  t3 #3(p0)\l\{p0, p1, t1, t2, t3\}\lread  t4 #4(p0)\l\{p0, p1, t1, t2, t3, t4\}\lread  t5 #5(p0)\l\{p0, p1, t1, t2, t3, t4, t5\}\lread  t6 #6(p0)\l\{p0, p1, t1, t2, t3, t4, t5, t6\}\lread  t7 #7(p0)\l\{p1, t1, t2, t3, t4, t5, t6, t7\}\lread  t8 #0(t1)\l\{p1, t1, t2, t3, t4, t5, t6, t7, t8\}\lcall  t9, t8(t1, p1)\l\{p1, t2, t3, t4, t5, t6, t7, t9\}\lread  t10 #0(t9)\l\{p1, t10, t2, t3, t4, t5, t6, t7, t9\}\lcall  t11, t10(t9, t2)\l\{p1, t11, t3, t4, t5, t6, t7\}\lbif  t11, L_b__f9_6\l\{p1, t3, t4, t5, t6, t7\}\l}"];
+  _b__f92 [label="{\{p1, t3, t4, t5, t6, t7\}\lread  t12 #0(t4)\l\{p1, t12, t3, t4, t5, t6, t7\}\lcall  t13, t12(t4, t3)\l\{p1, t13, t5, t6, t7\}\lread  t14 #0(t5)\l\{p1, t13, t14, t5, t6, t7\}\lcall  t15, t14(t5, p1)\l\{p1, t13, t15, t6, t7\}\lread  t16 #0(t13)\l\{p1, t13, t15, t16, t6, t7\}\lcall  t17, t16(t13, t15)\l\{p1, t17, t6, t7\}\lread  t18 #0(t6)\l\{p1, t17, t18, t6, t7\}\lcall  t19, t18(t6, t17)\l\{p1, t19, t7\}\lread  t20 #0(t7)\l\{p1, t19, t20, t7\}\lcall  t21, t20(t7, p1)\l\{t19, t21\}\lread  t22 #0(t19)\l\{t19, t21, t22\}\lcall  t0, t22(t19, t21)\l\{t0\}\lgoto  L_b__f9_7\l\{t0\}\l}"];
+  _b__f93 [label="{L_b__f9_6:\l|\{t3\}\lmove  t0, t3\l\{t0\}\l}"];
+  _b__f94 [label="{L_b__f9_7:\l|\{t0\}\lret  t0\l\{\}\l}"];
+  _b__f95 [label="{\{\}\l\<END: _b__f9\>\l\{\}\l}"];
+
+  _b__f90 -> _b__f91
+  _b__f91 -> _b__f93
+  _b__f91 -> _b__f92
+  _b__f92 -> _b__f94
+  _b__f93 -> _b__f94
+  _b__f94 -> _b__f95
+  
+  _b__f40 [label="{_b__f4:\l|\{p1\}\l\<BEGIN: _b__f4\>\l\{p1\}\l}"];
+  _b__f41 [label="{\{p1\}\lnew  t1 [_b__f6, p1]\l\{t1\}\lret  t1\l\{\}\l}"];
+  _b__f42 [label="{\{\}\l\<END: _b__f4\>\l\{\}\l}"];
+
+  _b__f40 -> _b__f41
+  _b__f41 -> _b__f42
+  
+  _b__f60 [label="{_b__f6:\l|\{p0, p1\}\l\<BEGIN: _b__f6\>\l\{p0, p1\}\l}"];
+  _b__f61 [label="{\{p0, p1\}\lread  t1 #1(p0)\l\{p1, t1\}\ladd  t0, t1, p1\l\{t0\}\lret  t0\l\{\}\l}"];
+  _b__f62 [label="{\{\}\l\<END: _b__f6\>\l\{\}\l}"];
+
+  _b__f60 -> _b__f61
+  _b__f61 -> _b__f62
+  
+  _b__f50 [label="{_b__f5:\l|\{p1\}\l\<BEGIN: _b__f5\>\l\{p1\}\l}"];
+  _b__f51 [label="{\{p1\}\ladd  t0, p1, p1\l\{t0\}\lret  t0\l\{\}\l}"];
+  _b__f52 [label="{\{\}\l\<END: _b__f5\>\l\{\}\l}"];
+
+  _b__f50 -> _b__f51
+  _b__f51 -> _b__f52
+  
+  _toplevel0 [label="{_toplevel:\l|\{\}\l\<BEGIN: _toplevel\>\l\{\}\l}"];
+  _toplevel1 [label="{\{\}\lnew  t1 [_b__f0]\l\{t1\}\lnew  t3 [_b__f1]\l\{t1, t3\}\lnew  t5 [_b__f2]\l\{t1, t3, t5\}\lnew  t8 [_b_map, t1, -1, t3, t5]\l\{t1, t3, t5, t8\}\lnew  t9 [_b__f3, t1, -1, t3, t5]\l\{t1, t8, t9\}\lnew  t11 [5, -1]\l\{t1, t11, t8, t9\}\lnew  t12 [4, t11]\l\{t1, t12, t8, t9\}\lnew  t13 [3, t12]\l\{t1, t13, t8, t9\}\lnew  t14 [2, t13]\l\{t1, t14, t8, t9\}\lnew  t15 [1, t14]\l\{t1, t15, t8, t9\}\lnew  t16 [_b__f4]\l\{t1, t15, t16, t8, t9\}\lcall  t19, _b__f3(t9, t16)\l\{t1, t15, t19, t8\}\lread  t20 #0(t19)\l\{t1, t15, t19, t20, t8\}\lcall  t21, t20(t19, 0)\l\{t1, t15, t21, t8\}\lnew  t22 [_b__f5]\l\{t1, t15, t21, t22, t8\}\lcall  t25, _b_map(t8, t22)\l\{t1, t15, t21, t25\}\lread  t26 #0(t25)\l\{t1, t15, t21, t25, t26\}\lcall  t27, t26(t25, t15)\l\{t1, t21, t27\}\lread  t28 #0(t21)\l\{t1, t21, t27, t28\}\lcall  t29, t28(t21, t27)\l\{t1, t29\}\lcall  t31, _b__f0(t1, t29)\l\{t31\}\lread  t32 #0(t31)\l\{t31, t32\}\lcall  t0, t32(t31, 30)\l\{t0\}\lret  t0\l\{\}\l}"];
+  _toplevel2 [label="{\{\}\l\<END: _toplevel\>\l\{\}\l}"];
+
+  _toplevel0 -> _toplevel1
+  _toplevel1 -> _toplevel2
+  }
